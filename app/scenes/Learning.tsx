@@ -14,12 +14,29 @@ import {
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import breakpoint from "styled-components-breakpoint";
-import { s } from "@shared/styles";
 import Button from "~/components/Button";
 import Heading from "~/components/Heading";
 import Scene from "~/components/Scene";
 
 const testModulesPath = "/doc/lms-h5p-test-modules-9uosPH9WQn";
+
+const brand = {
+  paper: "#f7f5ef",
+  surface: "#fffcf5",
+  rule: "#dedad1",
+  ink: "#20302d",
+  muted: "#777a73",
+  dark: "#1c2018",
+  darkSoft: "#25283a",
+  blue: "#354cef",
+  lime: "#edff3d",
+  lavender: "#ececff",
+  successSurface: "#e9f8f1",
+  successText: "#26724d",
+  warningSurface: "#fff7e6",
+  warningText: "#8a5a00",
+  mono: '"SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace',
+};
 
 type ModuleState =
   | "notStarted"
@@ -173,7 +190,7 @@ function Learning() {
       <Page>
         <Hero>
           <HeroCopy>
-            <Eyebrow>Ray-only test environment</Eyebrow>
+            <Eyebrow>Learning hub pilot</Eyebrow>
             <Heading>Learning</Heading>
             <HeroText>
               A focused training cockpit for Dash.fi modules, certifications,
@@ -184,15 +201,13 @@ function Learning() {
               <Button as={Link} to={testModulesPath} icon={<GoToIcon />}>
                 Continue learning
               </Button>
-              <Button neutral as="a" href="#modules">
-                Browse modules
-              </Button>
+              <SecondaryAction href="#modules">Browse modules</SecondaryAction>
             </Actions>
           </HeroCopy>
           <StatusPanel aria-label="Learning progress">
             <PanelHeader>
-              <PanelTitle>Test rollout</PanelTitle>
-              <StatusPill>Private</StatusPill>
+              <PanelTitle>First rollout</PanelTitle>
+              <StatusPill>Pilot</StatusPill>
             </PanelHeader>
             <MetricGrid>
               <Metric>
@@ -213,6 +228,10 @@ function Learning() {
 
         <Section>
           <SectionHeader>
+            <SectionKicker>
+              <SectionNumber>01</SectionNumber>
+              <span>Assigned modules</span>
+            </SectionKicker>
             <SectionTitle>Start here</SectionTitle>
             <SectionText>
               The first modules prove the full learning path: quiz, interactive
@@ -255,7 +274,10 @@ function Learning() {
                           aria-valuenow={module.progress}
                           role="progressbar"
                         >
-                          <ProgressFill $value={module.progress} />
+                          <ProgressFill
+                            $tone={state.tone}
+                            $value={module.progress}
+                          />
                         </ProgressTrack>
                       </ProgressWrap>
                       {state.disabled ? (
@@ -277,10 +299,14 @@ function Learning() {
 
         <Section>
           <SectionHeader>
+            <SectionKicker>
+              <SectionNumber>02</SectionNumber>
+              <span>Role tracks</span>
+            </SectionKicker>
             <SectionTitle>Role tracks</SectionTitle>
             <SectionText>
               Tracks keep the learner experience organized by job-to-be-done,
-              while the underlying docs and H5P packages stay private.
+              while the underlying docs and H5P packages stay governed.
             </SectionText>
           </SectionHeader>
           <TrackGrid>
@@ -301,6 +327,10 @@ function Learning() {
 
         <Section>
           <SectionHeader>
+            <SectionKicker>
+              <SectionNumber>03</SectionNumber>
+              <span>Future surfaces</span>
+            </SectionKicker>
             <SectionTitle>Coming soon</SectionTitle>
             <SectionText>
               These surfaces need a dedicated PRD and data model review before
@@ -330,7 +360,7 @@ function Learning() {
           </RoadmapItem>
           <RoadmapItem>
             <DoneIcon size={16} />
-            <span>Ray-only learning tab wired into the app shell</span>
+            <span>Learning tab wired into the app shell</span>
           </RoadmapItem>
           <RoadmapItem $pending>
             <span>3</span>
@@ -345,39 +375,63 @@ function Learning() {
 }
 
 const Page = styled.div`
+  background: ${brand.paper};
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   gap: 40px;
-  padding-bottom: 64px;
+  margin: 0;
+  min-width: 0;
+  padding: 24px 16px 64px;
+
+  ${breakpoint("tablet")`
+    margin: -16px -32px 0;
+    padding: 32px 32px 72px;
+  `};
 `;
 
 const Hero = styled.section`
+  background: ${brand.dark};
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: #fff;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 24px;
-  padding-top: 24px;
+  padding: 28px;
 
   ${breakpoint("tablet")`
     grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
     align-items: end;
+    padding: 40px;
   `};
 `;
 
 const HeroCopy = styled.div`
   max-width: 720px;
+
+  h1 {
+    color: #fff;
+    font-family: ${brand.mono};
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.02;
+  }
 `;
 
 const Eyebrow = styled.div`
-  color: ${s("accent")};
+  color: ${brand.lime};
+  font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0;
+  letter-spacing: 0.2em;
   margin-bottom: -12px;
   text-transform: uppercase;
 `;
 
 const HeroText = styled.p`
-  color: ${s("textSecondary")};
+  color: rgba(255, 255, 255, 0.7);
   font-size: 17px;
   line-height: 1.55;
   margin: -4px 0 0;
@@ -391,9 +445,29 @@ const Actions = styled.div`
   margin-top: 20px;
 `;
 
+const SecondaryAction = styled.a`
+  align-items: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 600;
+  height: 34px;
+  justify-content: center;
+  padding: 0 12px;
+  text-decoration: none;
+
+  &:hover {
+    color: #fff;
+    text-decoration: none;
+  }
+`;
+
 const StatusPanel = styled.aside`
-  background: ${s("backgroundSecondary")};
-  border: 1px solid ${s("divider")};
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   padding: 18px;
 `;
@@ -407,40 +481,50 @@ const PanelHeader = styled.div`
 `;
 
 const PanelTitle = styled.div`
-  color: ${s("text")};
+  color: #fff;
+  font-family: ${brand.mono};
   font-weight: 600;
 `;
 
 const StatusPill = styled.span<{ $tone?: StatusTone }>`
   background: ${(props) =>
     props.$tone === "accent"
-      ? props.theme.accent
+      ? brand.lime
       : props.$tone === "warning"
-        ? "#fff7e6"
+        ? brand.warningSurface
         : props.$tone === "muted"
-          ? props.theme.background
-          : props.theme.backgroundSecondary};
+          ? brand.lavender
+          : props.$tone === "active"
+            ? "rgba(53, 76, 239, 0.1)"
+            : brand.surface};
   border: 1px solid
     ${(props) =>
       props.$tone === "accent"
         ? "transparent"
         : props.$tone === "warning"
           ? "#f5c77e"
-          : props.theme.divider};
+          : props.$tone === "active"
+            ? "rgba(53, 76, 239, 0.28)"
+            : brand.rule};
   border-radius: 999px;
   color: ${(props) =>
     props.$tone === "accent"
-      ? props.theme.accentText
+      ? brand.dark
       : props.$tone === "active"
-        ? props.theme.accent
+        ? brand.blue
         : props.$tone === "warning"
-          ? "#8a5a00"
-          : props.theme.textSecondary};
+          ? brand.warningText
+          : props.$tone === "muted"
+            ? brand.blue
+            : brand.muted};
   display: inline-flex;
+  font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.08em;
   line-height: 1;
   padding: 6px 9px;
+  text-transform: uppercase;
   white-space: nowrap;
 `;
 
@@ -450,21 +534,25 @@ const MetricGrid = styled.div`
 `;
 
 const Metric = styled.div`
-  border-top: 1px solid ${s("divider")};
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
   padding-top: 12px;
 `;
 
 const MetricValue = styled.div`
-  color: ${s("text")};
+  color: #fff;
+  font-family: ${brand.mono};
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1;
 `;
 
 const MetricLabel = styled.div`
-  color: ${s("textSecondary")};
+  color: rgba(255, 255, 255, 0.55);
+  font-family: ${brand.mono};
   font-size: 13px;
+  letter-spacing: 0.08em;
   margin-top: 4px;
+  text-transform: uppercase;
 `;
 
 const Section = styled.section`
@@ -477,16 +565,46 @@ const SectionHeader = styled.div`
   max-width: 720px;
 `;
 
+const SectionKicker = styled.div`
+  align-items: center;
+  color: ${brand.muted};
+  display: flex;
+  font-family: ${brand.mono};
+  font-size: 12px;
+  font-weight: 700;
+  gap: 12px;
+  letter-spacing: 0.18em;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+
+  &::after {
+    background: ${brand.rule};
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+  }
+`;
+
+const SectionNumber = styled.span`
+  background: ${brand.lavender};
+  border-radius: 4px;
+  color: ${brand.blue};
+  display: inline-flex;
+  letter-spacing: 0.08em;
+  padding: 5px 9px;
+`;
+
 const SectionTitle = styled.h2`
-  color: ${s("text")};
-  font-size: 22px;
-  font-weight: 650;
+  color: ${brand.blue};
+  font-family: ${brand.mono};
+  font-size: 32px;
+  font-weight: 400;
   line-height: 1.2;
   margin: 0 0 6px;
 `;
 
 const SectionText = styled.p`
-  color: ${s("textSecondary")};
+  color: ${brand.muted};
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
@@ -502,12 +620,12 @@ const ModuleGrid = styled.div`
 `;
 
 const ModuleCard = styled.article`
-  background: ${s("background")};
-  border: 1px solid ${s("divider")};
-  border-radius: 8px;
+  background: ${brand.surface};
+  border: 1px solid ${brand.rule};
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  min-height: 260px;
+  min-height: 294px;
   padding: 18px;
 `;
 
@@ -520,34 +638,39 @@ const CardTopline = styled.div`
 `;
 
 const Chip = styled.span`
-  background: ${s("backgroundSecondary")};
-  border: 1px solid ${s("divider")};
-  border-radius: 999px;
-  color: ${s("textSecondary")};
+  background: rgba(53, 76, 239, 0.06);
+  border: 1px solid rgba(53, 76, 239, 0.14);
+  border-radius: 4px;
+  color: ${brand.ink};
+  font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.14em;
   padding: 5px 8px;
+  text-transform: uppercase;
 `;
 
 const CardMeta = styled.span`
   align-items: center;
-  color: ${s("textSecondary")};
+  color: ${brand.muted};
   display: inline-flex;
+  font-family: ${brand.mono};
   font-size: 12px;
   gap: 4px;
   white-space: nowrap;
 `;
 
 const CardTitle = styled.h3`
-  color: ${s("text")};
-  font-size: 17px;
-  font-weight: 650;
+  color: ${brand.ink};
+  font-family: ${brand.mono};
+  font-size: 20px;
+  font-weight: 400;
   line-height: 1.3;
   margin: 0 0 8px;
 `;
 
 const CardDescription = styled.p`
-  color: ${s("textSecondary")};
+  color: ${brand.muted};
   font-size: 14px;
   line-height: 1.45;
   margin: 0;
@@ -565,11 +688,13 @@ const CardFooter = styled.div`
 
 const Outcome = styled.span`
   align-items: center;
-  color: ${s("textSecondary")};
+  color: ${brand.muted};
   display: inline-flex;
+  font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 600;
   gap: 5px;
+  letter-spacing: 0.04em;
 `;
 
 const ProgressWrap = styled.div`
@@ -580,23 +705,33 @@ const ProgressWrap = styled.div`
 
 const ProgressMeta = styled.div`
   align-items: center;
-  color: ${s("textSecondary")};
+  color: ${brand.muted};
   display: flex;
+  font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 600;
   justify-content: space-between;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 `;
 
 const ProgressTrack = styled.div`
-  background: ${s("backgroundSecondary")};
-  border: 1px solid ${s("divider")};
+  background: #ece9e1;
+  border: 1px solid ${brand.rule};
   border-radius: 999px;
   height: 8px;
   overflow: hidden;
 `;
 
-const ProgressFill = styled.div<{ $value: number }>`
-  background: ${s("accent")};
+const ProgressFill = styled.div<{ $tone: StatusTone; $value: number }>`
+  background: ${(props) =>
+    props.$tone === "accent"
+      ? brand.lime
+      : props.$tone === "warning"
+        ? "#d89b24"
+        : props.$tone === "muted"
+          ? brand.rule
+          : brand.blue};
   border-radius: inherit;
   height: 100%;
   transition: width 160ms ease;
@@ -605,14 +740,12 @@ const ProgressFill = styled.div<{ $value: number }>`
 
 const CardAction = styled.a<{ $disabled?: boolean }>`
   align-items: center;
-  background: ${(props) =>
-    props.$disabled ? props.theme.backgroundSecondary : props.theme.text};
-  border: 1px solid
-    ${(props) => (props.$disabled ? props.theme.divider : "transparent")};
+  background: ${(props) => (props.$disabled ? "#ece9e1" : brand.dark)};
+  border: 1px solid ${(props) => (props.$disabled ? brand.rule : "transparent")};
   border-radius: 6px;
-  color: ${(props) =>
-    props.$disabled ? props.theme.textSecondary : props.theme.background};
+  color: ${(props) => (props.$disabled ? brand.muted : "#fff")};
   display: flex;
+  font-family: ${brand.mono};
   font-size: 14px;
   font-weight: 600;
   gap: 6px;
@@ -623,8 +756,7 @@ const CardAction = styled.a<{ $disabled?: boolean }>`
   text-decoration: none;
 
   &:hover {
-    color: ${(props) =>
-      props.$disabled ? props.theme.textSecondary : props.theme.background};
+    color: ${(props) => (props.$disabled ? brand.muted : brand.lime)};
     opacity: ${(props) => (props.$disabled ? 1 : 0.9)};
     text-decoration: none;
   }
@@ -641,9 +773,9 @@ const TrackGrid = styled.div`
 
 const TrackCard = styled.article`
   align-items: flex-start;
-  background: ${s("backgroundSecondary")};
-  border: 1px solid ${s("divider")};
-  border-radius: 8px;
+  background: ${brand.surface};
+  border: 1px solid ${brand.rule};
+  border-radius: 12px;
   display: flex;
   gap: 14px;
   padding: 16px;
@@ -651,10 +783,10 @@ const TrackCard = styled.article`
 
 const TrackIcon = styled.div`
   align-items: center;
-  background: ${s("background")};
-  border: 1px solid ${s("divider")};
+  background: ${brand.lavender};
+  border: 1px solid rgba(53, 76, 239, 0.12);
   border-radius: 8px;
-  color: ${s("accent")};
+  color: ${brand.blue};
   display: flex;
   flex: 0 0 36px;
   height: 36px;
@@ -668,18 +800,19 @@ const TrackCopy = styled.div`
 
 const TrackTitle = styled.h3`
   align-items: center;
-  color: ${s("text")};
+  color: ${brand.ink};
   display: flex;
   flex-wrap: wrap;
+  font-family: ${brand.mono};
   font-size: 15px;
-  font-weight: 650;
+  font-weight: 600;
   gap: 6px;
   margin: 0;
 
   &::after {
-    background: ${s("accent")};
+    background: ${brand.lavender};
     border-radius: 999px;
-    color: ${s("accentText")};
+    color: ${brand.blue};
     content: "(Coming soon)";
     font-size: 11px;
     font-weight: 700;
@@ -689,14 +822,17 @@ const TrackTitle = styled.h3`
 `;
 
 const TrackMeta = styled.div`
-  color: ${s("accent")};
+  color: ${brand.blue};
+  font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 650;
+  letter-spacing: 0.08em;
   margin-top: 2px;
+  text-transform: uppercase;
 `;
 
 const TrackDescription = styled.p`
-  color: ${s("textSecondary")};
+  color: ${brand.muted};
   font-size: 13px;
   line-height: 1.45;
   margin: 8px 0 0;
@@ -713,9 +849,9 @@ const FutureGrid = styled.div`
 
 const FutureCard = styled.article`
   align-items: flex-start;
-  background: ${s("background")};
-  border: 1px dashed ${s("divider")};
-  border-radius: 8px;
+  background: ${brand.dark};
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
   display: flex;
   gap: 14px;
   padding: 16px;
@@ -723,10 +859,10 @@ const FutureCard = styled.article`
 
 const FutureIcon = styled.div`
   align-items: center;
-  background: ${s("backgroundSecondary")};
-  border: 1px solid ${s("divider")};
+  background: rgba(237, 255, 61, 0.1);
+  border: 1px solid rgba(237, 255, 61, 0.22);
   border-radius: 8px;
-  color: ${s("accent")};
+  color: ${brand.lime};
   display: flex;
   flex: 0 0 36px;
   height: 36px;
@@ -740,9 +876,10 @@ const FutureCopy = styled.div`
 
 const FutureTitle = styled.h3`
   align-items: center;
-  color: ${s("text")};
+  color: #fff;
   display: flex;
   flex-wrap: wrap;
+  font-family: ${brand.mono};
   font-size: 15px;
   font-weight: 650;
   gap: 8px;
@@ -750,24 +887,27 @@ const FutureTitle = styled.h3`
 `;
 
 const FutureBadge = styled.span`
-  background: ${s("accent")};
+  background: ${brand.lime};
   border-radius: 999px;
-  color: ${s("accentText")};
+  color: ${brand.dark};
+  font-family: ${brand.mono};
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.08em;
   line-height: 1;
   padding: 4px 7px;
+  text-transform: uppercase;
 `;
 
 const FutureDescription = styled.p`
-  color: ${s("textSecondary")};
+  color: rgba(255, 255, 255, 0.62);
   font-size: 13px;
   line-height: 1.45;
   margin: 8px 0 0;
 `;
 
 const Roadmap = styled.div`
-  border-top: 1px solid ${s("divider")};
+  border-top: 1px solid ${brand.rule};
   display: grid;
   gap: 10px;
   padding-top: 18px;
@@ -775,22 +915,20 @@ const Roadmap = styled.div`
 
 const RoadmapItem = styled.div<{ $pending?: boolean }>`
   align-items: center;
-  color: ${(props) =>
-    props.$pending ? props.theme.textSecondary : props.theme.text};
+  color: ${(props) => (props.$pending ? brand.muted : brand.ink)};
   display: flex;
+  font-family: ${brand.mono};
   font-size: 13px;
   gap: 8px;
 
   svg,
   > span:first-child {
     align-items: center;
-    background: ${(props) =>
-      props.$pending ? props.theme.backgroundSecondary : props.theme.accent};
+    background: ${(props) => (props.$pending ? brand.surface : brand.blue)};
     border: 1px solid
-      ${(props) => (props.$pending ? props.theme.divider : "transparent")};
+      ${(props) => (props.$pending ? brand.rule : "transparent")};
     border-radius: 999px;
-    color: ${(props) =>
-      props.$pending ? props.theme.textSecondary : props.theme.accentText};
+    color: ${(props) => (props.$pending ? brand.muted : "#fff")};
     display: inline-flex;
     flex: 0 0 22px;
     font-size: 12px;
