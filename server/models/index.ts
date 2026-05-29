@@ -28,6 +28,8 @@ export { default as Group } from "./Group";
 
 export { default as GroupUser } from "./GroupUser";
 
+export { default as H5PModule } from "./H5PModule";
+
 export { default as Import } from "./Import";
 
 export { default as ImportTask } from "./ImportTask";

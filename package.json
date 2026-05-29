@@ -139,6 +139,7 @@
     "fs-extra": "^11.3.4",
     "fuzzy-search": "^3.2.1",
     "glob": "^11.1.0",
+    "h5p-standalone": "3.8.2",
     "hot-shots": "^12.1.0",
     "http-errors": "2.0.1",
     "https-proxy-agent": "^7.0.6",

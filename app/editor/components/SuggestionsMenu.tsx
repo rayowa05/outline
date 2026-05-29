@@ -27,6 +27,7 @@ import {
 import { MouseSafeArea } from "~/components/MouseSafeArea";
 import Scrollable from "~/components/Scrollable";
 import useMobile from "~/hooks/useMobile";
+import { client } from "~/utils/ApiClient";
 import Logger from "~/utils/Logger";
 import { useEditor } from "./EditorContext";
 import Input from "./Input";
@@ -261,6 +262,8 @@ function SuggestionsMenu<T extends MenuItem>(props: Props<T>) {
           );
         case "video":
           return triggerFilePick("video/*", item.attrs);
+        case "h5p":
+          return triggerFilePick(".h5p", item.attrs);
         case "attachment":
           return triggerFilePick(item.attrs?.accept ?? "*", item.attrs);
         case "embed":
@@ -370,12 +373,56 @@ function SuggestionsMenu<T extends MenuItem>(props: Props<T>) {
       onFileUploadProgress,
     } = props;
     const files = getEventFiles(event);
+    const file = files[0];
     const parent = findParentNode((node) => !!node)(view.state.selection);
     const attrs = event.currentTarget.dataset.attrs
       ? JSON.parse(event.currentTarget.dataset.attrs)
       : undefined;
+    const isH5P = inputRef.current?.accept === ".h5p";
 
     handleClearSearch();
+
+    if (isH5P) {
+      if (!file) {
+        return;
+      }
+
+      onFileUploadStart?.();
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        if (editorProps.id) {
+          formData.append("documentId", editorProps.id);
+        }
+
+        const response = await client.post<{
+          data: {
+            moduleId: string;
+            title: string;
+            contentType: string;
+          };
+        }>("/h5p.upload", formData);
+
+        commands.h5p({
+          moduleId: response.data.moduleId,
+          title: response.data.title,
+          contentType: response.data.contentType,
+        });
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : t("Unable to upload H5P module")
+        );
+      } finally {
+        onFileUploadStop?.();
+        if (inputRef.current) {
+          inputRef.current.value = "";
+          inputRef.current.accept = "";
+          delete inputRef.current.dataset.attrs;
+        }
+        props.onClose();
+      }
+      return;
+    }
 
     if (!uploadFile) {
       throw new Error("uploadFile prop is required to replace files");

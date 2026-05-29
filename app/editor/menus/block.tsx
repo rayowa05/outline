@@ -23,6 +23,7 @@ import {
   DoneIcon,
   EmbedIcon,
   CollapseIcon,
+  ShapesIcon,
 } from "outline-icons";
 import * as React from "react";
 import styled from "styled-components";
@@ -116,6 +117,12 @@ export default function blockMenuItems(
       title: t("Video"),
       icon: <EmbedIcon />,
       keywords: "mov avi upload player",
+    },
+    {
+      name: "h5p",
+      title: t("H5P module"),
+      icon: <ShapesIcon />,
+      keywords: "quiz learning interactive training upload",
     },
     {
       name: "attachment",

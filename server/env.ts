@@ -503,6 +503,15 @@ export class Environment {
   );
 
   /**
+   * Supabase Edge Function endpoint for H5P xAPI tracking.
+   */
+  @IsUrl()
+  @IsOptional()
+  public H5P_TRACKING_URL = this.toOptionalString(
+    environment.H5P_TRACKING_URL
+  );
+
+  /**
    * A DataDog API key for tracking server metrics.
    */
   public DD_API_KEY = environment.DD_API_KEY;

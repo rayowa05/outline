@@ -25,7 +25,9 @@ const koa = new Koa();
 const router = new Router();
 
 // serve public assets
-router.use(["/images/*", "/email/*", "/fonts/*"], async (ctx, next) => {
+router.use(
+  ["/images/*", "/email/*", "/fonts/*", "/h5p-libraries/*", "/h5p-player/*"],
+  async (ctx, next) => {
   let done;
 
   if (ctx.method === "HEAD" || ctx.method === "GET") {
@@ -48,7 +50,8 @@ router.use(["/images/*", "/email/*", "/fonts/*"], async (ctx, next) => {
   if (!done) {
     await next();
   }
-});
+  }
+);
 
 router.use(
   ["/share/:shareId", "/share/:shareId/doc/:documentSlug", "/share/:shareId/*"],

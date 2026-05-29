@@ -47,7 +47,7 @@ interface CSPOptions {
 export default function createCSPMiddleware(options?: CSPOptions) {
   // Construct scripts CSP based on options in use
   const defaultSrc: string[] = ["'self'"];
-  const scriptSrc: string[] = [];
+  const scriptSrc: string[] = ["'self'"];
   const styleSrc: string[] = ["'self'", "'unsafe-inline'"];
   const objectSrc: string[] = [env.URL, "'self'"];
 
@@ -64,6 +64,9 @@ export default function createCSPMiddleware(options?: CSPOptions) {
   } else {
     scriptSrc.push(env.URL);
   }
+
+  scriptSrc.push("https://www.youtube.com");
+  scriptSrc.push("https://s.ytimg.com");
 
   if (env.GOOGLE_ANALYTICS_ID) {
     scriptSrc.push("www.googletagmanager.com");

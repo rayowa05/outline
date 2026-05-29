@@ -25,6 +25,7 @@ import Doc from "./Doc";
 import Embed from "./Embed";
 import Emoji from "./Emoji";
 import HardBreak from "./HardBreak";
+import H5PBlock from "./H5PBlock";
 import Heading from "./Heading";
 import HorizontalRule from "./HorizontalRule";
 import Image from "./Image";
@@ -105,6 +106,7 @@ export const richExtensions: Nodes = [
   CodeBlock,
   CodeFence,
   Blockquote,
+  H5PBlock,
   Embed,
   Attachment,
   Video,

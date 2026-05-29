@@ -11729,6 +11729,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"h5p-standalone@npm:3.8.2":
+  version: 3.8.2
+  resolution: "h5p-standalone@npm:3.8.2"
+  checksum: 10c0/9571c4b9177b6692886f0c8324af6925efeb24c772c112746beae1b24261a3d0e6c3a81bb50b45fc4dab2af34b2c427ab70cda31e395b4b01aa66c9319cfd756
+  languageName: node
+  linkType: hard
+
 "hachure-fill@npm:^0.5.2":
   version: 0.5.2
   resolution: "hachure-fill@npm:0.5.2"
@@ -15203,6 +15210,7 @@ __metadata:
     fs-extra: "npm:^11.3.4"
     fuzzy-search: "npm:^3.2.1"
     glob: "npm:^11.1.0"
+    h5p-standalone: "npm:3.8.2"
     hot-shots: "npm:^12.1.0"
     http-errors: "npm:2.0.1"
     https-proxy-agent: "npm:^7.0.6"

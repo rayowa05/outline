@@ -1,9 +1,29 @@
 ARG APP_PATH=/opt/outline
-ARG BASE_IMAGE=outlinewiki/outline-base
-FROM ${BASE_IMAGE} AS base
+
+FROM node:24.16.0 AS base
 
 ARG APP_PATH
 WORKDIR $APP_PATH
+COPY ./package.json ./yarn.lock ./.yarnrc.yml ./
+COPY ./patches ./patches
+
+RUN apt-get update \
+    && apt-get install -y cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV NODE_OPTIONS="--max-old-space-size=24000"
+
+RUN corepack enable
+RUN yarn install --immutable --network-timeout 1000000 && \
+    yarn cache clean
+
+COPY . .
+ARG CDN_URL
+RUN test -d public/h5p-libraries && test -d public/h5p-player
+RUN yarn build
+
+RUN yarn workspaces focus --production && \
+    yarn cache clean
 
 # ---
 FROM node:24.16.0-slim AS runner
