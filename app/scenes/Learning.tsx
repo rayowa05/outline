@@ -6,7 +6,9 @@ import {
   GraphIcon,
   GoToIcon,
   LightningIcon,
+  PadlockIcon,
   ProfileIcon,
+  SparklesIcon,
   TargetIcon,
 } from "outline-icons";
 import { Link } from "react-router-dom";
@@ -19,38 +21,106 @@ import Scene from "~/components/Scene";
 
 const testModulesPath = "/doc/lms-h5p-test-modules-9uosPH9WQn";
 
+type ModuleState =
+  | "notStarted"
+  | "inProgress"
+  | "completed"
+  | "comingSoon"
+  | "designing";
+
+type StatusTone = "accent" | "active" | "neutral" | "muted" | "warning";
+
+const moduleStates: Record<
+  ModuleState,
+  {
+    label: string;
+    action: string;
+    tone: StatusTone;
+    disabled?: boolean;
+  }
+> = {
+  notStarted: {
+    label: "Not started",
+    action: "Start module",
+    tone: "neutral",
+  },
+  inProgress: {
+    label: "In progress",
+    action: "Continue",
+    tone: "active",
+  },
+  completed: {
+    label: "Completed",
+    action: "Review",
+    tone: "accent",
+  },
+  comingSoon: {
+    label: "Coming soon",
+    action: "Coming soon",
+    tone: "muted",
+    disabled: true,
+  },
+  designing: {
+    label: "Designing",
+    action: "Preview",
+    tone: "warning",
+  },
+};
+
 const modules = [
   {
     title: "Dash.fi Product Knowledge",
     type: "Quiz",
     length: "8 min",
-    status: "Ready",
+    state: "completed" as const,
+    progress: 100,
     score: "80% pass",
     description:
       "Baseline certification on cashback, limits, repayment, and product positioning.",
-    action: "Start quiz",
     path: testModulesPath,
   },
   {
     title: "Competitor Deep Dive: SoFi",
     type: "Interactive video",
     length: "12 min",
-    status: "Ready",
+    state: "inProgress" as const,
+    progress: 45,
     score: "4 checkpoints",
     description:
       "Practice discovery-first positioning against SoFi with checkpoint questions.",
-    action: "Watch module",
     path: testModulesPath,
   },
   {
     title: "Discovery & Objection Lab",
     type: "Practice",
     length: "20 min",
-    status: "Designing",
+    state: "notStarted" as const,
+    progress: 0,
     score: "Scenario based",
     description:
       "Role-play branching paths for common first-call objections and next steps.",
-    action: "Preview",
+    path: testModulesPath,
+  },
+  {
+    title: "First Call Certification",
+    type: "Certification",
+    length: "30 min",
+    state: "designing" as const,
+    progress: 0,
+    score: "Manager reviewed",
+    description:
+      "A scored practice path for discovery, positioning, objection handling, and follow-up discipline.",
+    path: testModulesPath,
+  },
+  {
+    title: "Manager Coaching Review",
+    type: "Coaching",
+    length: "15 min",
+    state: "comingSoon" as const,
+    progress: 0,
+    score: "Team review",
+    description:
+      "A manager-led review module for reinforcing certifications in coaching conversations.",
     path: testModulesPath,
   },
 ];
@@ -152,25 +222,54 @@ function Learning() {
           <ModuleGrid id="modules">
             {modules.map((module) => (
               <ModuleCard key={module.title}>
-                <CardTopline>
-                  <Chip>{module.type}</Chip>
-                  <CardMeta>
-                    <ClockIcon size={14} /> {module.length}
-                  </CardMeta>
-                </CardTopline>
-                <CardTitle>{module.title}</CardTitle>
-                <CardDescription>{module.description}</CardDescription>
-                <CardFooter>
-                  <Outcome>
-                    <TargetIcon size={14} /> {module.score}
-                  </Outcome>
-                  <StatusPill $muted={module.status !== "Ready"}>
-                    {module.status}
-                  </StatusPill>
-                </CardFooter>
-                <CardAction as={Link} to={module.path}>
-                  {module.action}
-                </CardAction>
+                {(() => {
+                  const state = moduleStates[module.state];
+
+                  return (
+                    <>
+                      <CardTopline>
+                        <Chip>{module.type}</Chip>
+                        <CardMeta>
+                          <ClockIcon size={14} /> {module.length}
+                        </CardMeta>
+                      </CardTopline>
+                      <CardTitle>{module.title}</CardTitle>
+                      <CardDescription>{module.description}</CardDescription>
+                      <CardFooter>
+                        <Outcome>
+                          <TargetIcon size={14} /> {module.score}
+                        </Outcome>
+                        <StatusPill $tone={state.tone}>
+                          {state.label}
+                        </StatusPill>
+                      </CardFooter>
+                      <ProgressWrap>
+                        <ProgressMeta>
+                          <span>Progress</span>
+                          <span>{module.progress}%</span>
+                        </ProgressMeta>
+                        <ProgressTrack
+                          aria-label={`${module.title} progress`}
+                          aria-valuemax={100}
+                          aria-valuemin={0}
+                          aria-valuenow={module.progress}
+                          role="progressbar"
+                        >
+                          <ProgressFill $value={module.progress} />
+                        </ProgressTrack>
+                      </ProgressWrap>
+                      {state.disabled ? (
+                        <CardAction as="span" $disabled>
+                          <PadlockIcon size={14} /> {state.action}
+                        </CardAction>
+                      ) : (
+                        <CardAction as={Link} to={module.path}>
+                          <SparklesIcon size={14} /> {state.action}
+                        </CardAction>
+                      )}
+                    </>
+                  );
+                })()}
               </ModuleCard>
             ))}
           </ModuleGrid>
@@ -312,14 +411,31 @@ const PanelTitle = styled.div`
   font-weight: 600;
 `;
 
-const StatusPill = styled.span<{ $muted?: boolean }>`
+const StatusPill = styled.span<{ $tone?: StatusTone }>`
   background: ${(props) =>
-    props.$muted ? props.theme.background : props.theme.accent};
+    props.$tone === "accent"
+      ? props.theme.accent
+      : props.$tone === "warning"
+        ? "#fff7e6"
+        : props.$tone === "muted"
+          ? props.theme.background
+          : props.theme.backgroundSecondary};
   border: 1px solid
-    ${(props) => (props.$muted ? props.theme.divider : "transparent")};
+    ${(props) =>
+      props.$tone === "accent"
+        ? "transparent"
+        : props.$tone === "warning"
+          ? "#f5c77e"
+          : props.theme.divider};
   border-radius: 999px;
   color: ${(props) =>
-    props.$muted ? props.theme.textSecondary : props.theme.accentText};
+    props.$tone === "accent"
+      ? props.theme.accentText
+      : props.$tone === "active"
+        ? props.theme.accent
+        : props.$tone === "warning"
+          ? "#8a5a00"
+          : props.theme.textSecondary};
   display: inline-flex;
   font-size: 12px;
   font-weight: 600;
@@ -456,22 +572,60 @@ const Outcome = styled.span`
   gap: 5px;
 `;
 
-const CardAction = styled.a`
+const ProgressWrap = styled.div`
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+`;
+
+const ProgressMeta = styled.div`
   align-items: center;
-  background: ${s("text")};
+  color: ${s("textSecondary")};
+  display: flex;
+  font-size: 12px;
+  font-weight: 600;
+  justify-content: space-between;
+`;
+
+const ProgressTrack = styled.div`
+  background: ${s("backgroundSecondary")};
+  border: 1px solid ${s("divider")};
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+`;
+
+const ProgressFill = styled.div<{ $value: number }>`
+  background: ${s("accent")};
+  border-radius: inherit;
+  height: 100%;
+  transition: width 160ms ease;
+  width: ${(props) => props.$value}%;
+`;
+
+const CardAction = styled.a<{ $disabled?: boolean }>`
+  align-items: center;
+  background: ${(props) =>
+    props.$disabled ? props.theme.backgroundSecondary : props.theme.text};
+  border: 1px solid
+    ${(props) => (props.$disabled ? props.theme.divider : "transparent")};
   border-radius: 6px;
-  color: ${s("background")};
+  color: ${(props) =>
+    props.$disabled ? props.theme.textSecondary : props.theme.background};
   display: flex;
   font-size: 14px;
   font-weight: 600;
+  gap: 6px;
   height: 34px;
   justify-content: center;
   margin-top: 16px;
+  pointer-events: ${(props) => (props.$disabled ? "none" : "auto")};
   text-decoration: none;
 
   &:hover {
-    color: ${s("background")};
-    opacity: 0.9;
+    color: ${(props) =>
+      props.$disabled ? props.theme.textSecondary : props.theme.background};
+    opacity: ${(props) => (props.$disabled ? 1 : 0.9)};
     text-decoration: none;
   }
 `;
