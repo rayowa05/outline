@@ -8,6 +8,10 @@ export function homePath(): string {
   return env.ROOT_SHARE_ID ? "/" : "/home";
 }
 
+export function learningPath(): string {
+  return "/learning";
+}
+
 export function logoutPath() {
   return {
     pathname: "/",

@@ -1,5 +1,10 @@
 import { observer } from "mobx-react";
-import { SearchIcon, HomeIcon, SidebarIcon } from "outline-icons";
+import {
+  AcademicCapIcon,
+  SearchIcon,
+  HomeIcon,
+  SidebarIcon,
+} from "outline-icons";
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -18,7 +23,7 @@ import useCurrentUser from "~/hooks/useCurrentUser";
 import usePolicy from "~/hooks/usePolicy";
 import useStores from "~/hooks/useStores";
 import TeamMenu from "~/menus/TeamMenu";
-import { homePath, searchPath } from "~/utils/routeHelpers";
+import { homePath, learningPath, searchPath } from "~/utils/routeHelpers";
 import TeamLogo from "../TeamLogo";
 import Tooltip from "../Tooltip";
 import Sidebar from "./Sidebar";
@@ -45,6 +50,7 @@ function AppSidebar() {
   const can = usePolicy(team);
   const history = useHistory();
   const isMobile = useMobile();
+  const canAccessLearning = user.email === "ray@dash.fi";
 
   const handleSearchClick = useCallback(() => {
     const basePath = searchPath();
@@ -124,6 +130,14 @@ function AppSidebar() {
                   exact={false}
                   label={t("Home")}
                 />
+                {canAccessLearning && (
+                  <SidebarLink
+                    to={learningPath()}
+                    icon={<AcademicCapIcon />}
+                    exact={false}
+                    label={t("Learning")}
+                  />
+                )}
                 <SidebarLink
                   to={searchPath()}
                   icon={<SearchIcon />}

@@ -1,6 +1,6 @@
 import * as React from "react";
-import { CSRF } from "@shared/constants";
 import styled from "styled-components";
+import { CSRF } from "../../constants";
 import type { ComponentProps } from "../types";
 
 interface H5PBlockProps extends ComponentProps {
@@ -22,15 +22,39 @@ export default function H5PBlock({
   title,
   contentType,
 }: H5PBlockProps) {
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [error, setError] = React.useState<string | undefined>();
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [shouldRender, setShouldRender] = React.useState(false);
+
+  React.useEffect(() => {
+    const wrapper = wrapperRef.current;
+
+    if (!wrapper || typeof IntersectionObserver === "undefined") {
+      setShouldRender(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, []);
 
   React.useEffect(() => {
     let isMounted = true;
     const container = containerRef.current;
 
-    if (!container) {
+    if (!container || !shouldRender) {
       return;
     }
 
@@ -54,6 +78,10 @@ export default function H5PBlock({
         frame: true,
         fullScreen: true,
         title,
+        assetsRequestFetchOptions: {
+          cache: "force-cache",
+          credentials: "same-origin",
+        },
         xAPIObjectIRI,
       });
 
@@ -121,15 +149,20 @@ export default function H5PBlock({
       cleanupTracking?.();
       container.innerHTML = "";
     };
-  }, [contentType, moduleId, title]);
+  }, [contentType, moduleId, shouldRender, title]);
 
   return (
-    <Wrapper contentEditable={false}>
+    <Wrapper contentEditable={false} ref={wrapperRef}>
       <Header>
         <Title>{title}</Title>
         {contentType && <ContentType>{contentType}</ContentType>}
       </Header>
-      {isLoading && <Status>Loading interactive module…</Status>}
+      {!shouldRender && (
+        <Status>Interactive module will load as it comes into view…</Status>
+      )}
+      {shouldRender && isLoading && (
+        <Status>Loading interactive module…</Status>
+      )}
       {error && <ErrorMessage>{error}</ErrorMessage>}
       <Player ref={containerRef} />
     </Wrapper>

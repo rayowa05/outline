@@ -10,12 +10,14 @@ import PlaceholderDocument from "~/components/PlaceholderDocument";
 import Route from "~/components/ProfiledRoute";
 import WebsocketProvider from "~/components/WebsocketProvider";
 import useCurrentTeam from "~/hooks/useCurrentTeam";
+import useCurrentUser from "~/hooks/useCurrentUser";
 import usePolicy from "~/hooks/usePolicy";
 import lazy from "~/utils/lazyWithRetry";
 import {
   archivePath,
   draftsPath,
   homePath,
+  learningPath,
   searchPath,
   settingsPath,
   matchDocumentSlug as documentSlug,
@@ -31,6 +33,7 @@ const Collection = lazy(() => import("~/scenes/Collection"));
 const Document = lazy(() => import("~/scenes/Document"));
 const Drafts = lazy(() => import("~/scenes/Drafts"));
 const Home = lazy(() => import("~/scenes/Home"));
+const Learning = lazy(() => import("~/scenes/Learning"));
 const Search = lazy(() => import("~/scenes/Search"));
 const Trash = lazy(() => import("~/scenes/Trash"));
 const Debug = lazy(() => import("~/scenes/Developer/Debug"));
@@ -54,7 +57,9 @@ const RedirectDocument = ({
  */
 function AuthenticatedRoutes() {
   const team = useCurrentTeam();
+  const user = useCurrentUser();
   const can = usePolicy(team);
+  const canAccessLearning = user.email === "ray@dash.fi";
 
   return (
     <WebsocketProvider>
@@ -77,6 +82,9 @@ function AuthenticatedRoutes() {
               <Route exact path={trashPath()} component={Trash} />
             )}
             <Route path={`${homePath()}/:tab?`} component={Home} />
+            {canAccessLearning && (
+              <Route exact path={learningPath()} component={Learning} />
+            )}
             <Redirect from="/dashboard" to={homePath()} />
             <Redirect exact from="/starred" to={homePath()} />
             <Redirect exact from="/templates" to={settingsPath("templates")} />

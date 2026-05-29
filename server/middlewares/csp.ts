@@ -104,6 +104,7 @@ export default function createCSPMiddleware(options?: CSPOptions) {
       ],
       mediaSrc: ["*", "data:", "blob:"],
       imgSrc: ["*", "data:", "blob:"],
+      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
       frameSrc: ["*", "data:"],
       workerSrc: ["'self'"],
       objectSrc,
