@@ -186,7 +186,7 @@ const futureFeatures = [
 
 function Learning() {
   return (
-    <Scene icon={<AcademicCapIcon />} title="Learning">
+    <Scene icon={<AcademicCapIcon />} title="Learning" wide>
       <Page>
         <Hero>
           <HeroCopy>
@@ -615,7 +615,7 @@ const ModuleGrid = styled.div`
   gap: 14px;
 
   ${breakpoint("tablet")`
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   `};
 `;
 
@@ -767,7 +767,7 @@ const TrackGrid = styled.div`
   gap: 12px;
 
   ${breakpoint("tablet")`
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   `};
 `;
 
@@ -843,7 +843,7 @@ const FutureGrid = styled.div`
   gap: 12px;
 
   ${breakpoint("tablet")`
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   `};
 `;
 
