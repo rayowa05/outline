@@ -37,6 +37,7 @@ export const LearningProgressSchema = BaseSchema.extend({
     maxWatched: z.number().nonnegative().default(0),
     totalDuration: z.number().nonnegative().default(0),
     completedCheckpointIds: z.array(z.string()).default([]),
+    failedCheckpointIds: z.array(z.string()).default([]),
     checkpointCount: z.number().int().nonnegative().default(0),
   }),
 });

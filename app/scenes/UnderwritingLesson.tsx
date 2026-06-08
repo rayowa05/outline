@@ -61,6 +61,9 @@ const brand = {
 
 const GONG_TIME_EPSILON_SECONDS = 0.08;
 const SEEK_LOCK_GRACE_SECONDS = 1.25;
+const SKILL_CHECK_REPLAY_BUFFER_SECONDS = 5;
+const SKILL_CHECK_MISS_PROMPT =
+  "Not quite. This skill check is required to move forward. You can continue the lesson now, but you'll need to replay this section and answer it correctly before completing the lesson.";
 const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5] as const;
 
 type PlaybackRate = (typeof PLAYBACK_RATES)[number];
@@ -170,6 +173,8 @@ function UnderwritingLesson() {
   const [completedCheckpointIds, setCompletedCheckpointIds] = useState<
     string[]
   >([]);
+  const [failedCheckpointIds, setFailedCheckpointIds] = useState<string[]>([]);
+  const [remediationCheckpointId, setRemediationCheckpointId] = useState("");
   const [lessonCompleted, setLessonCompleted] = useState(false);
   const [loadedProgressKey, setLoadedProgressKey] = useState("");
   const [checkpointFeedback, setCheckpointFeedback] = useState("");
@@ -284,6 +289,33 @@ function UnderwritingLesson() {
   const progressValue = totalDuration
     ? Math.min(100, Math.max(0, (displayedTime / totalDuration) * 100))
     : 0;
+  const hasSkillCheckMiss = failedCheckpointIds.length > 0;
+  const canAdvanceLesson = lessonCompleted && !hasSkillCheckMiss;
+  const lessonCheckpoints = production?.checkpoints ?? [];
+  const firstFailedCheckpoint = lessonCheckpoints.find((checkpoint) =>
+    failedCheckpointIds.includes(checkpoint.id)
+  );
+  const firstFailedCheckpointIndex = firstFailedCheckpoint
+    ? lessonCheckpoints.findIndex(
+        (checkpoint) => checkpoint.id === firstFailedCheckpoint.id
+      )
+    : -1;
+  const replayFromStart =
+    firstFailedCheckpointIndex <= 0 || !firstFailedCheckpoint;
+  const replayCheckpoint = replayFromStart
+    ? null
+    : lessonCheckpoints[firstFailedCheckpointIndex - 1];
+  const skillCheckReplayStart = firstFailedCheckpoint
+    ? replayFromStart
+      ? 0
+      : Math.max(
+          0,
+          (replayCheckpoint?.placement ?? 0) - SKILL_CHECK_REPLAY_BUFFER_SECONDS
+        )
+    : 0;
+  const skillCheckReplayLabel = replayFromStart
+    ? "Replay from beginning"
+    : "Replay from last passed skill check";
   const startModalVisible = !reviewMode && !lessonIntroDismissed;
   const completionModalVisible = !reviewMode && lessonCompleted;
   const playerModalActive = startModalVisible || completionModalVisible;
@@ -302,6 +334,36 @@ function UnderwritingLesson() {
     production?.checkpoints?.filter((checkpoint) =>
       completedCheckpointIds.includes(checkpoint.id)
     ).length ?? 0;
+  const timelineMarkers = useMemo(() => {
+    if (!totalDuration) {
+      return [];
+    }
+
+    const skillMarkers =
+      production?.checkpoints?.map((checkpoint) => ({
+        id: `skill:${checkpoint.id}`,
+        label: "Skill check",
+        time: checkpoint.placement,
+        type: "skill" as const,
+      })) ?? [];
+    const gongMarkers = lessonGongEvidence
+      .filter(
+        (clip) =>
+          clip.lessonStart !== null &&
+          clip.lessonStart !== undefined &&
+          clip.lessonStart >= 0
+      )
+      .map((clip) => ({
+        id: `gong:${clip.callId}:${clip.lessonStart}`,
+        label: "Gong clip",
+        time: clip.lessonStart ?? 0,
+        type: "gong" as const,
+      }));
+
+    return [...skillMarkers, ...gongMarkers].filter(
+      (marker) => marker.time >= 0 && marker.time <= totalDuration
+    );
+  }, [lessonGongEvidence, production?.checkpoints, totalDuration]);
   const watchedProgress = totalDuration
     ? Math.min(100, Math.max(0, (maxWatched / totalDuration) * 100))
     : 0;
@@ -326,34 +388,47 @@ function UnderwritingLesson() {
             meta: "Return to the module map",
             title: "Course overview",
           };
-  const completionModalCopy = isFinalCourseLesson
+  const completionModalCopy = hasSkillCheckMiss
     ? {
-        body: "You have completed the required lessons and knowledge checks for certification. Head back to the course overview to confirm your completion status.",
-        kicker: "Course complete",
-        title: "Congratulations, you completed Underwriting Training.",
+        body: "You missed one or more required skill checks. Replay from the last completed checkpoint, then answer the missed skill check correctly to unlock the next lesson.",
+        kicker: "Skill check review required",
+        title: "Replay the missed section",
       }
-    : nextLesson?.kind === "quiz"
+    : isFinalCourseLesson
       ? {
-          body: "You need 100% to pass and unlock the next module. Use your notes, take your time, and answer carefully.",
-          kicker: "Module complete",
-          title: "Ready for the module quiz",
+          body: "You have completed the required lessons and knowledge checks for certification. Head back to the course overview to confirm your completion status.",
+          kicker: "Course complete",
+          title: "Congratulations, you completed Underwriting Training.",
         }
-      : {
-          body: "Keep going while the examples are fresh. The next lesson builds on what you just covered.",
-          kicker: "Lesson complete",
-          title: `Next up: ${nextAction.title}`,
-        };
+      : nextLesson?.kind === "quiz"
+        ? {
+            body: "You need 100% to pass and unlock the next module. Use your notes, take your time, and answer carefully.",
+            kicker: "Module complete",
+            title: "Ready for the module quiz",
+          }
+        : {
+            body: "Keep going while the examples are fresh. The next lesson builds on what you just covered.",
+            kicker: "Lesson complete",
+            title: `Next up: ${nextAction.title}`,
+          };
   const openDueCheckpoint = useCallback(
     (time: number) => {
       if (reviewMode || activeCheckpoint || !production?.checkpoints?.length) {
         return false;
       }
 
-      const checkpoint = production.checkpoints.find(
-        (item) =>
+      const checkpoint = production.checkpoints.find((item) => {
+        const alreadyPassed = completedCheckpointIds.includes(item.id);
+        const missedAndDismissed =
+          failedCheckpointIds.includes(item.id) &&
+          remediationCheckpointId !== item.id;
+
+        return (
           time + GONG_TIME_EPSILON_SECONDS >= item.placement &&
-          !completedCheckpointIds.includes(item.id)
-      );
+          !alreadyPassed &&
+          !missedAndDismissed
+        );
+      });
 
       if (!checkpoint) {
         return false;
@@ -374,8 +449,10 @@ function UnderwritingLesson() {
     [
       activeCheckpoint,
       completedCheckpointIds,
+      failedCheckpointIds,
       pauseGongPlayback,
       production?.checkpoints,
+      remediationCheckpointId,
       reviewMode,
     ]
   );
@@ -475,6 +552,8 @@ function UnderwritingLesson() {
     const savedProgress = window.localStorage.getItem(progressStorageKey);
     if (!savedProgress) {
       setCompletedCheckpointIds([]);
+      setFailedCheckpointIds([]);
+      setRemediationCheckpointId("");
       setMaxWatched(0);
       setLessonCompleted(false);
       setLoadedProgressKey(progressStorageKey);
@@ -484,14 +563,20 @@ function UnderwritingLesson() {
     try {
       const parsed = JSON.parse(savedProgress) as {
         completedCheckpointIds?: string[];
+        failedCheckpointIds?: string[];
         lessonCompleted?: boolean;
         maxWatched?: number;
+        remediationCheckpointId?: string;
       };
       setCompletedCheckpointIds(parsed.completedCheckpointIds ?? []);
+      setFailedCheckpointIds(parsed.failedCheckpointIds ?? []);
+      setRemediationCheckpointId(parsed.remediationCheckpointId ?? "");
       setMaxWatched(parsed.maxWatched ?? 0);
       setLessonCompleted(Boolean(parsed.lessonCompleted));
     } catch {
       setCompletedCheckpointIds([]);
+      setFailedCheckpointIds([]);
+      setRemediationCheckpointId("");
       setMaxWatched(0);
       setLessonCompleted(false);
     }
@@ -523,17 +608,21 @@ function UnderwritingLesson() {
       progressStorageKey,
       JSON.stringify({
         completedCheckpointIds,
+        failedCheckpointIds,
         lessonCompleted,
         maxWatched,
+        remediationCheckpointId,
         updatedAt: new Date().toISOString(),
       })
     );
   }, [
     completedCheckpointIds,
+    failedCheckpointIds,
     lessonCompleted,
     loadedProgressKey,
     maxWatched,
     progressStorageKey,
+    remediationCheckpointId,
     serverProgressReconciled,
   ]);
 
@@ -567,6 +656,8 @@ function UnderwritingLesson() {
         if (resetOnServer) {
           clearUnderwritingLessonStorage();
           setCompletedCheckpointIds([]);
+          setFailedCheckpointIds([]);
+          setRemediationCheckpointId("");
           setMaxWatched(0);
           setLessonCompleted(false);
           setLessonIntroDismissed(false);
@@ -611,7 +702,8 @@ function UnderwritingLesson() {
       checkpointCount: production?.checkpoints?.length ?? 0,
       completedCheckpointIds,
       courseId: "underwriting-training",
-      lessonCompleted,
+      failedCheckpointIds,
+      lessonCompleted: canAdvanceLesson,
       lessonNumber: activeLesson,
       maxWatched,
       moduleNumber: activeModule,
@@ -634,7 +726,9 @@ function UnderwritingLesson() {
   }, [
     activeLesson,
     activeModule,
+    canAdvanceLesson,
     completedCheckpointIds,
+    failedCheckpointIds,
     lessonCompleted,
     loadedProgressKey,
     maxWatched,
@@ -874,6 +968,32 @@ function UnderwritingLesson() {
     }
   }, [getActiveGongMediaElement]);
 
+  const replayLessonForSkillChecks = useCallback(() => {
+    if (!firstFailedCheckpoint) {
+      return;
+    }
+
+    pauseGongPlayback();
+    setActiveCheckpoint(null);
+    setCheckpointFeedback("");
+    setRemediationCheckpointId(firstFailedCheckpoint.id);
+    setCompletedCheckpointIds((ids) =>
+      ids.filter((id) => id !== firstFailedCheckpoint.id)
+    );
+    setLessonCompleted(false);
+    setMaxWatched(skillCheckReplayStart);
+    setCurrentTime(skillCheckReplayStart);
+    setAutoGongClipSrc(null);
+    setIsTimelinePlaying(false);
+    lastTriggeredGongClipRef.current = "";
+
+    if (mediaRef.current) {
+      mediaRef.current.pause();
+      mediaRef.current.currentTime = skillCheckReplayStart;
+      window.setTimeout(() => void mediaRef.current?.play(), 50);
+    }
+  }, [firstFailedCheckpoint, pauseGongPlayback, skillCheckReplayStart]);
+
   useEffect(() => {
     if (!reviewMode) {
       return;
@@ -944,243 +1064,267 @@ function UnderwritingLesson() {
           <MediaColumn>
             <PlayerShell data-testid="lesson-player">
               <PlayerFrame $modalActive={playerModalActive}>
-              <StageHeader>
-                <StageKicker>{lesson.title}</StageKicker>
-                <StageTime>
-                  {formatTime(displayedTime)} / {formatTime(totalDuration)}
-                </StageTime>
-              </StageHeader>
-              <StageBody
-                data-testid="lesson-stage-body"
-                $gongMode={Boolean(activeGongClip)}
-                $layout={activeLayout}
-                $tone={activeTone}
-                $videoExpanded={hasWorkflowVideo && workflowVideoExpanded}
-                $videoMode={hasWorkflowVideo}
-              >
-                {hasWorkflowVideo && workflowVideoExpanded ? null : (
-                  <StageCopyPanel
-                    $gongMode={Boolean(activeGongClip)}
-                    $layout={activeLayout}
-                  >
-                    <StageMarker>
-                      {activeGongClip ? "Gong call" : visualLabel(activeVisual)}
-                    </StageMarker>
-                    <StageTitle
-                      $compact={compactStageTitle}
-                      $gongMode={Boolean(activeGongClip)}
-                    >
-                      {activeStageTitle}
-                    </StageTitle>
-                    <StageSubcopy $gongMode={Boolean(activeGongClip)}>
-                      {activeGongClip?.prime ??
-                        activeSection?.stageCopy ??
-                        "Production blueprint ready. Media, captions, objectives, and checkpoints attach to this lesson package."}
-                    </StageSubcopy>
-                  </StageCopyPanel>
-                )}
-                <StageVisual
-                  data-testid="lesson-stage-visual"
+                <StageHeader>
+                  <StageKicker>{lesson.title}</StageKicker>
+                  <StageTime>
+                    {formatTime(displayedTime)} / {formatTime(totalDuration)}
+                  </StageTime>
+                </StageHeader>
+                <StageBody
+                  data-testid="lesson-stage-body"
                   $gongMode={Boolean(activeGongClip)}
                   $layout={activeLayout}
                   $tone={activeTone}
                   $videoExpanded={hasWorkflowVideo && workflowVideoExpanded}
                   $videoMode={hasWorkflowVideo}
                 >
-                  {media?.videoSrc ? (
-                    <WorkflowVideoPlayer
-                      ref={setMainMediaRef}
-                      controls={reviewMode}
-                      controlsList="nodownload noplaybackrate"
-                      data-testid="lesson-video"
-                      onLoadedMetadata={(event) =>
-                        updateMediaTime(event.currentTarget)
-                      }
-                      onEnded={() => {
-                        setLessonCompleted(true);
-                        setIsTimelinePlaying(false);
-                      }}
-                      onPlay={() => setWorkflowVideoExpanded(true)}
-                      onSeeked={(event) => {
-                        keepLearnersFromSeekingForward(event.currentTarget);
-                        updateMediaTime(event.currentTarget);
-                      }}
-                      onSeeking={(event) =>
-                        keepLearnersFromSeekingForward(event.currentTarget)
-                      }
-                      onTimeUpdate={(event) =>
-                        updateMediaTime(event.currentTarget)
-                      }
-                      preload="auto"
-                      src={media.videoSrc}
+                  {hasWorkflowVideo && workflowVideoExpanded ? null : (
+                    <StageCopyPanel
+                      $gongMode={Boolean(activeGongClip)}
+                      $layout={activeLayout}
                     >
-                      {captionsSrc ? (
-                        <track
-                          default
-                          kind="subtitles"
-                          label="English"
-                          src={captionsSrc}
-                          srcLang="en"
-                        />
-                      ) : null}
-                    </WorkflowVideoPlayer>
-                  ) : (
-                    renderLessonVisual(
-                      activeVisual,
-                      activeSection,
-                      activeGongEvidence,
-                      () => {
-                        mediaRef.current?.pause();
-                        setIsTimelinePlaying(true);
-                      },
-                      () => setIsTimelinePlaying(false),
-                      autoGongClipSrc,
-                      finishAutoGongClip
-                    )
+                      <StageMarker>
+                        {activeGongClip
+                          ? "Gong call"
+                          : visualLabel(activeVisual)}
+                      </StageMarker>
+                      <StageTitle
+                        $compact={compactStageTitle}
+                        $gongMode={Boolean(activeGongClip)}
+                      >
+                        {activeStageTitle}
+                      </StageTitle>
+                      <StageSubcopy $gongMode={Boolean(activeGongClip)}>
+                        {activeGongClip?.prime ??
+                          activeSection?.stageCopy ??
+                          "Production blueprint ready. Media, captions, objectives, and checkpoints attach to this lesson package."}
+                      </StageSubcopy>
+                    </StageCopyPanel>
                   )}
-                </StageVisual>
-              </StageBody>
-              {media?.audioSrc || media?.videoSrc ? (
-                <TimelineDock>
-                  <TimelinePlayButton
-                    aria-label={
-                      isTimelinePlaying ? "Pause lesson" : "Play lesson"
-                    }
-                    onClick={toggleTimelinePlayback}
-                    type="button"
+                  <StageVisual
+                    data-testid="lesson-stage-visual"
+                    $gongMode={Boolean(activeGongClip)}
+                    $layout={activeLayout}
+                    $tone={activeTone}
+                    $videoExpanded={hasWorkflowVideo && workflowVideoExpanded}
+                    $videoMode={hasWorkflowVideo}
                   >
-                    {isTimelinePlaying ? "Pause" : "Play"}
-                  </TimelinePlayButton>
-                  <TimelineTime>{formatTime(displayedTime)}</TimelineTime>
-                  <TimelineRange
-                    aria-label="Lesson timeline"
-                    max={Math.max(totalDuration, 1)}
-                    min={0}
-                    onChange={(event) =>
-                      seekTo(Number(event.currentTarget.value))
-                    }
-                    onInput={(event) =>
-                      seekTo(Number(event.currentTarget.value))
-                    }
-                    onPointerDown={(event) => {
-                      event.currentTarget.setPointerCapture(event.pointerId);
-                      seekTimelineFromPointer(event);
-                    }}
-                    onPointerMove={(event) => {
-                      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-                        seekTimelineFromPointer(event);
-                      }
-                    }}
-                    step={0.1}
-                    type="range"
-                    value={Math.min(displayedTime, totalDuration || 0)}
-                  />
-                  <TimelineTime>{formatTime(totalDuration)}</TimelineTime>
-                  <PlaybackRateSelect
-                    aria-label="Playback speed"
-                    onChange={(event) =>
-                      changePlaybackRate(
-                        Number(event.currentTarget.value) as PlaybackRate
-                      )
-                    }
-                    value={playbackRate}
-                  >
-                    {PLAYBACK_RATES.map((rate) => (
-                      <option key={rate} value={rate}>
-                        {rate}x
-                      </option>
-                    ))}
-                  </PlaybackRateSelect>
-                  {captionsSrc ? (
-                    <CaptionToggleButton
-                      aria-label={
-                        captionsEnabled ? "Hide captions" : "Show captions"
-                      }
-                      disabled={captionsStatus !== "ready"}
-                      onClick={() => setCaptionsEnabled((value) => !value)}
-                      title={
-                        captionsStatus === "error"
-                          ? "Captions unavailable"
-                          : captionsStatus === "loading"
-                            ? "Captions loading"
-                            : undefined
-                      }
-                      type="button"
-                      $active={captionsEnabled}
-                    >
-                      CC
-                    </CaptionToggleButton>
-                  ) : null}
-                </TimelineDock>
-              ) : null}
-              {captionsEnabled && activeCaption ? (
-                <CaptionOverlay data-testid="lesson-captions">
-                  {activeCaption}
-                </CaptionOverlay>
-              ) : null}
-              {reviewMode ? (
-                <ReviewModeBadge data-testid="lesson-review-mode">
-                  Review mode
-                </ReviewModeBadge>
-              ) : null}
-              {media?.videoSrc ? null : (
-                <AudioDock>
-                  {media?.audioSrc ? (
-                    <AudioPlayer
-                      ref={setMainMediaRef}
-                      data-testid="lesson-audio"
-                      onLoadedMetadata={(event) =>
-                        updateMediaTime(event.currentTarget)
-                      }
-                      onPause={() => {
-                        if (!autoGongClipSrc) {
+                    {media?.videoSrc ? (
+                      <WorkflowVideoPlayer
+                        ref={setMainMediaRef}
+                        controls={reviewMode}
+                        controlsList="nodownload noplaybackrate"
+                        data-testid="lesson-video"
+                        onLoadedMetadata={(event) =>
+                          updateMediaTime(event.currentTarget)
+                        }
+                        onEnded={() => {
+                          setLessonCompleted(true);
                           setIsTimelinePlaying(false);
+                        }}
+                        onPlay={() => setWorkflowVideoExpanded(true)}
+                        onSeeked={(event) => {
+                          keepLearnersFromSeekingForward(event.currentTarget);
+                          updateMediaTime(event.currentTarget);
+                        }}
+                        onSeeking={(event) =>
+                          keepLearnersFromSeekingForward(event.currentTarget)
                         }
-                      }}
-                      onPlay={() => {
-                        if (!autoGongClipSrc) {
+                        onTimeUpdate={(event) =>
+                          updateMediaTime(event.currentTarget)
+                        }
+                        preload="auto"
+                        src={media.videoSrc}
+                      >
+                        {captionsSrc ? (
+                          <track
+                            default
+                            kind="subtitles"
+                            label="English"
+                            src={captionsSrc}
+                            srcLang="en"
+                          />
+                        ) : null}
+                      </WorkflowVideoPlayer>
+                    ) : (
+                      renderLessonVisual(
+                        activeVisual,
+                        activeSection,
+                        activeGongEvidence,
+                        () => {
+                          mediaRef.current?.pause();
                           setIsTimelinePlaying(true);
-                        }
-                      }}
-                      onSeeked={(event) => {
-                        keepLearnersFromSeekingForward(event.currentTarget);
-                        updateMediaTime(event.currentTarget);
-                      }}
-                      onSeeking={(event) => {
-                        pauseGongPlayback();
-                        setIsTimelinePlaying(false);
-                        keepLearnersFromSeekingForward(event.currentTarget);
-                      }}
-                      onTimeUpdate={(event) =>
-                        updateMediaTime(event.currentTarget)
+                        },
+                        () => setIsTimelinePlaying(false),
+                        autoGongClipSrc,
+                        finishAutoGongClip
+                      )
+                    )}
+                  </StageVisual>
+                </StageBody>
+                {media?.audioSrc || media?.videoSrc ? (
+                  <TimelineDock>
+                    <TimelinePlayButton
+                      aria-label={
+                        isTimelinePlaying ? "Pause lesson" : "Play lesson"
                       }
-                      onEnded={() => {
-                        setLessonCompleted(true);
-                        setIsTimelinePlaying(false);
-                      }}
-                      preload="auto"
-                      src={media.audioSrc}
+                      onClick={toggleTimelinePlayback}
+                      type="button"
                     >
-                      {captionsSrc ? (
-                        <track
-                          default
-                          kind="captions"
-                          label="English"
-                          src={captionsSrc}
-                          srcLang="en"
-                        />
-                      ) : null}
-                    </AudioPlayer>
-                  ) : (
-                    <MediaMissing>
-                      Media is not loaded for this lesson yet.
-                    </MediaMissing>
-                  )}
-                </AudioDock>
-              )}
-              <StageProgress aria-hidden="true">
-                <StageProgressFill style={{ width: `${progressValue}%` }} />
-              </StageProgress>
+                      {isTimelinePlaying ? "Pause" : "Play"}
+                    </TimelinePlayButton>
+                    <TimelineTime>{formatTime(displayedTime)}</TimelineTime>
+                    <TimelineTrack>
+                      <TimelineRange
+                        aria-label="Lesson timeline"
+                        max={Math.max(totalDuration, 1)}
+                        min={0}
+                        onChange={(event) =>
+                          seekTo(Number(event.currentTarget.value))
+                        }
+                        onInput={(event) =>
+                          seekTo(Number(event.currentTarget.value))
+                        }
+                        onPointerDown={(event) => {
+                          event.currentTarget.setPointerCapture(
+                            event.pointerId
+                          );
+                          seekTimelineFromPointer(event);
+                        }}
+                        onPointerMove={(event) => {
+                          if (
+                            event.currentTarget.hasPointerCapture(
+                              event.pointerId
+                            )
+                          ) {
+                            seekTimelineFromPointer(event);
+                          }
+                        }}
+                        step={0.1}
+                        type="range"
+                        value={Math.min(displayedTime, totalDuration || 0)}
+                      />
+                      <TimelineMarkers aria-hidden="true">
+                        {timelineMarkers.map((marker) => (
+                          <TimelineMarker
+                            key={marker.id}
+                            style={
+                              {
+                                "--left": `${(marker.time / Math.max(totalDuration, 1)) * 100}%`,
+                              } as CSSProperties
+                            }
+                            title={marker.label}
+                            $type={marker.type}
+                          />
+                        ))}
+                      </TimelineMarkers>
+                    </TimelineTrack>
+                    <TimelineTime>{formatTime(totalDuration)}</TimelineTime>
+                    <PlaybackRateSelect
+                      aria-label="Playback speed"
+                      onChange={(event) =>
+                        changePlaybackRate(
+                          Number(event.currentTarget.value) as PlaybackRate
+                        )
+                      }
+                      value={playbackRate}
+                    >
+                      {PLAYBACK_RATES.map((rate) => (
+                        <option key={rate} value={rate}>
+                          {rate}x
+                        </option>
+                      ))}
+                    </PlaybackRateSelect>
+                    {captionsSrc ? (
+                      <CaptionToggleButton
+                        aria-label={
+                          captionsEnabled ? "Hide captions" : "Show captions"
+                        }
+                        disabled={captionsStatus !== "ready"}
+                        onClick={() => setCaptionsEnabled((value) => !value)}
+                        title={
+                          captionsStatus === "error"
+                            ? "Captions unavailable"
+                            : captionsStatus === "loading"
+                              ? "Captions loading"
+                              : undefined
+                        }
+                        type="button"
+                        $active={captionsEnabled}
+                      >
+                        CC
+                      </CaptionToggleButton>
+                    ) : null}
+                  </TimelineDock>
+                ) : null}
+                {captionsEnabled && activeCaption ? (
+                  <CaptionOverlay data-testid="lesson-captions">
+                    {activeCaption}
+                  </CaptionOverlay>
+                ) : null}
+                {reviewMode ? (
+                  <ReviewModeBadge data-testid="lesson-review-mode">
+                    Review mode
+                  </ReviewModeBadge>
+                ) : null}
+                {media?.videoSrc ? null : (
+                  <AudioDock>
+                    {media?.audioSrc ? (
+                      <AudioPlayer
+                        ref={setMainMediaRef}
+                        data-testid="lesson-audio"
+                        onLoadedMetadata={(event) =>
+                          updateMediaTime(event.currentTarget)
+                        }
+                        onPause={() => {
+                          if (!autoGongClipSrc) {
+                            setIsTimelinePlaying(false);
+                          }
+                        }}
+                        onPlay={() => {
+                          if (!autoGongClipSrc) {
+                            setIsTimelinePlaying(true);
+                          }
+                        }}
+                        onSeeked={(event) => {
+                          keepLearnersFromSeekingForward(event.currentTarget);
+                          updateMediaTime(event.currentTarget);
+                        }}
+                        onSeeking={(event) => {
+                          pauseGongPlayback();
+                          setIsTimelinePlaying(false);
+                          keepLearnersFromSeekingForward(event.currentTarget);
+                        }}
+                        onTimeUpdate={(event) =>
+                          updateMediaTime(event.currentTarget)
+                        }
+                        onEnded={() => {
+                          setLessonCompleted(true);
+                          setIsTimelinePlaying(false);
+                        }}
+                        preload="auto"
+                        src={media.audioSrc}
+                      >
+                        {captionsSrc ? (
+                          <track
+                            default
+                            kind="captions"
+                            label="English"
+                            src={captionsSrc}
+                            srcLang="en"
+                          />
+                        ) : null}
+                      </AudioPlayer>
+                    ) : (
+                      <MediaMissing>
+                        Media is not loaded for this lesson yet.
+                      </MediaMissing>
+                    )}
+                  </AudioDock>
+                )}
+                <StageProgress aria-hidden="true">
+                  <StageProgressFill style={{ width: `${progressValue}%` }} />
+                </StageProgress>
               </PlayerFrame>
               {startModalVisible ? (
                 <LessonModalOverlay data-testid="lesson-start-modal">
@@ -1217,13 +1361,23 @@ function UnderwritingLesson() {
                   aria-live="polite"
                   data-testid="lesson-complete-modal"
                 >
-                  <LessonModalPanel $complete={isFinalCourseLesson}>
-                    {isFinalCourseLesson ? (
+                  <LessonModalPanel
+                    $complete={isFinalCourseLesson && !hasSkillCheckMiss}
+                  >
+                    {isFinalCourseLesson && !hasSkillCheckMiss ? (
                       <CourseConfetti aria-hidden="true">
-                        {Array.from({ length: 18 }).map((_, index) => (
+                        {Array.from({ length: 88 }).map((_, index) => (
                           <span
                             key={index}
-                            style={{ "--i": index } as CSSProperties}
+                            style={
+                              {
+                                "--i": index,
+                                "--delay": `${(index % 18) * -0.22}s`,
+                                "--drift": `${((index % 9) - 4) * 18}px`,
+                                "--duration": `${3.6 + (index % 8) * 0.32}s`,
+                                "--left": `${(index * 37) % 100}%`,
+                              } as CSSProperties
+                            }
                           />
                         ))}
                       </CourseConfetti>
@@ -1234,10 +1388,21 @@ function UnderwritingLesson() {
                     <LessonModalTitle>
                       {completionModalCopy.title}
                     </LessonModalTitle>
-                    <LessonModalCopy>{completionModalCopy.body}</LessonModalCopy>
-                    <LessonModalButton as={Link} to={nextAction.href}>
-                      {nextAction.label}
-                    </LessonModalButton>
+                    <LessonModalCopy>
+                      {completionModalCopy.body}
+                    </LessonModalCopy>
+                    {hasSkillCheckMiss ? (
+                      <LessonModalButton
+                        onClick={replayLessonForSkillChecks}
+                        type="button"
+                      >
+                        {skillCheckReplayLabel}
+                      </LessonModalButton>
+                    ) : (
+                      <LessonModalButton as={Link} to={nextAction.href}>
+                        {nextAction.label}
+                      </LessonModalButton>
+                    )}
                   </LessonModalPanel>
                 </LessonModalOverlay>
               ) : null}
@@ -1246,9 +1411,22 @@ function UnderwritingLesson() {
                   checkpoint={activeCheckpoint}
                   feedback={checkpointFeedback}
                   onAnswer={(option) => {
-                    setCheckpointFeedback(option.feedback);
                     if (option.correct) {
+                      setCheckpointFeedback(option.feedback);
                       setCompletedCheckpointIds((ids) =>
+                        ids.includes(activeCheckpoint.id)
+                          ? ids
+                          : [...ids, activeCheckpoint.id]
+                      );
+                      if (remediationCheckpointId === activeCheckpoint.id) {
+                        setFailedCheckpointIds((ids) =>
+                          ids.filter((id) => id !== activeCheckpoint.id)
+                        );
+                        setRemediationCheckpointId("");
+                      }
+                    } else {
+                      setCheckpointFeedback(SKILL_CHECK_MISS_PROMPT);
+                      setFailedCheckpointIds((ids) =>
                         ids.includes(activeCheckpoint.id)
                           ? ids
                           : [...ids, activeCheckpoint.id]
@@ -1256,7 +1434,7 @@ function UnderwritingLesson() {
                     }
                   }}
                   onContinue={() => {
-                    if (!completedCheckpointIds.includes(activeCheckpoint.id)) {
+                    if (!checkpointFeedback) {
                       return;
                     }
 
@@ -1342,7 +1520,7 @@ function UnderwritingLesson() {
                   </NextLessonLabel>
                   <NextLessonTitle>{nextAction.title}</NextLessonTitle>
                   <NextLessonMeta>{nextAction.meta}</NextLessonMeta>
-                  {lessonCompleted ? (
+                  {canAdvanceLesson ? (
                     <NextLessonButton as={Link} to={nextAction.href}>
                       {nextAction.label}
                     </NextLessonButton>
@@ -1438,7 +1616,9 @@ function UnderwritingLesson() {
                     </ProgressMiniTrack>
                     <span>
                       {lessonCompleted
-                        ? "Lesson complete"
+                        ? canAdvanceLesson
+                          ? "Lesson complete"
+                          : "Review required"
                         : `${Math.round(watchedProgress)}% watched`}
                     </span>
                   </ProgressMini>
@@ -1457,6 +1637,7 @@ function UnderwritingLesson() {
                         $complete={completedCheckpointIds.includes(
                           checkpoint.id
                         )}
+                        $missed={failedCheckpointIds.includes(checkpoint.id)}
                         $reviewMode={reviewMode}
                       >
                         <CheckpointTopline>
@@ -1506,8 +1687,8 @@ function CheckpointOverlay({
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [shuffleSeed] = useState(() => Math.random().toString(36).slice(2));
   const displayOptions = useMemo(
-    () => shuffleBySeed(checkpoint.options, `${checkpoint.id}:${shuffleSeed}`),
-    [checkpoint.id, checkpoint.options, shuffleSeed]
+    () => orderCheckpointOptions(checkpoint, shuffleSeed),
+    [checkpoint, shuffleSeed]
   );
 
   return (
@@ -1525,6 +1706,7 @@ function CheckpointOverlay({
               key={option.id}
               $correct={Boolean(option.correct)}
               $selected={selectedOptionId === option.id}
+              disabled={Boolean(selectedOptionId)}
               onClick={() => {
                 setSelectedOptionId(option.id);
                 onAnswer(option);
@@ -1540,7 +1722,7 @@ function CheckpointOverlay({
           {feedback || "Select the best answer to continue."}
         </CheckpointFeedback>
         <CheckpointContinue
-          disabled={!passed}
+          disabled={!feedback}
           onClick={onContinue}
           type="button"
         >
@@ -3014,6 +3196,35 @@ function shuffleBySeed<T>(items: T[], seed: string) {
   }
 
   return nextItems;
+}
+
+function orderCheckpointOptions(checkpoint: LessonCheckpoint, seed: string) {
+  const options = shuffleBySeed(
+    checkpoint.options,
+    `${checkpoint.id}:${checkpoint.placement}:${seed}:shuffle`
+  );
+  const correctIndex = options.findIndex((option) => option.correct);
+
+  if (correctIndex < 0 || options.length < 2) {
+    return options;
+  }
+
+  const targetIndex = Math.floor(
+    seededRandom(
+      `${checkpoint.id}:${checkpoint.placement}:${seed}:position`
+    )() * options.length
+  );
+
+  if (targetIndex === correctIndex) {
+    return options;
+  }
+
+  [options[correctIndex], options[targetIndex]] = [
+    options[targetIndex],
+    options[correctIndex],
+  ];
+
+  return options;
 }
 
 function parseDuration(duration: string) {
@@ -4952,11 +5163,46 @@ const TimelineTime = styled.span`
   text-align: center;
 `;
 
+const TimelineTrack = styled.div`
+  min-width: 0;
+  position: relative;
+`;
+
 const TimelineRange = styled.input`
   accent-color: ${brand.lime};
   cursor: pointer;
+  display: block;
   min-width: 0;
+  position: relative;
   width: 100%;
+  z-index: 2;
+`;
+
+const TimelineMarkers = styled.div`
+  bottom: -3px;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: -3px;
+  z-index: 3;
+`;
+
+const TimelineMarker = styled.span<{ $type: "gong" | "skill" }>`
+  background: ${(props) => (props.$type === "gong" ? brand.purple : "#fff")};
+  border: 2px solid
+    ${(props) =>
+      props.$type === "gong" ? "rgba(255, 255, 255, 0.92)" : brand.blue};
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(12, 14, 10, 0.55);
+  cursor: help;
+  height: ${(props) => (props.$type === "gong" ? "12px" : "10px")};
+  left: var(--left);
+  pointer-events: auto;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: ${(props) => (props.$type === "gong" ? "12px" : "10px")};
 `;
 
 const PlaybackRateSelect = styled.select`
@@ -5451,48 +5697,57 @@ const NextLessonButton = styled.a<{ $disabled?: boolean }>`
 `;
 
 const CourseConfetti = styled.div`
-  height: 72px;
-  position: relative;
-  width: 220px;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
 
   span {
-    animation: course-confetti-pop 1.45s ease-out infinite;
+    animation: course-confetti-fall 4.8s linear infinite;
     background: ${brand.blue};
     border-radius: 2px;
-    height: 10px;
-    left: 50%;
+    height: 16px;
+    left: var(--left);
+    opacity: 0.92;
     position: absolute;
-    top: 48%;
-    transform: rotate(calc(var(--i) * 21deg));
+    top: -32px;
+    transform: rotate(calc(var(--i) * 17deg));
     transform-origin: center;
-    width: 6px;
+    width: 8px;
+    animation-delay: var(--delay);
+    animation-duration: var(--duration);
   }
 
   span:nth-child(3n) {
     background: ${brand.lime};
+    width: 12px;
   }
 
   span:nth-child(4n) {
     background: #ff8a5b;
+    border-radius: 999px;
+    height: 10px;
   }
 
-  @keyframes course-confetti-pop {
+  span:nth-child(5n) {
+    background: ${brand.purple};
+  }
+
+  @keyframes course-confetti-fall {
     0% {
       opacity: 0;
-      transform: translate(0, 0) rotate(calc(var(--i) * 21deg)) scale(0.4);
+      transform: translate3d(0, -24px, 0) rotate(0deg);
     }
 
-    20% {
+    10% {
       opacity: 1;
     }
 
     100% {
-      opacity: 0;
-      transform: translate(
-          calc((var(--i) - 9) * 12px),
-          calc(-68px + var(--i) * 4px)
-        )
-        rotate(calc(var(--i) * 47deg)) scale(1);
+      opacity: 0.92;
+      transform: translate3d(var(--drift), calc(100vh + 72px), 0)
+        rotate(calc(360deg + var(--i) * 19deg));
     }
   }
 `;
@@ -5504,12 +5759,19 @@ const CheckpointList = styled.div`
 
 const CheckpointItem = styled.button<{
   $complete?: boolean;
+  $missed?: boolean;
   $reviewMode?: boolean;
 }>`
   appearance: none;
-  background: ${(props) => (props.$complete ? "#eef8d5" : brand.mutedBlock)};
+  background: ${(props) =>
+    props.$missed ? "#fff7e6" : props.$complete ? "#eef8d5" : brand.mutedBlock};
   border: 1px solid
-    ${(props) => (props.$complete ? "rgba(118, 145, 31, 0.36)" : brand.rule)};
+    ${(props) =>
+      props.$missed
+        ? "#efd69b"
+        : props.$complete
+          ? "rgba(118, 145, 31, 0.36)"
+          : brand.rule};
   border-radius: 8px;
   color: inherit;
   cursor: ${(props) => (props.$reviewMode ? "pointer" : "default")};
@@ -5669,19 +5931,26 @@ const CheckpointAnswer = styled.button<{
   &:hover {
     border-color: ${brand.blue};
   }
+
+  &:disabled {
+    cursor: default;
+  }
 `;
 
 const CheckpointFeedback = styled.div<{
   $passed?: boolean;
   $visible?: boolean;
 }>`
-  background: ${(props) => (props.$passed ? "#e9f8f1" : "#fff7e6")};
-  border: 1px solid ${(props) => (props.$passed ? "#b8e0ca" : "#efd69b")};
+  background: ${(props) =>
+    props.$visible ? (props.$passed ? "#e9f8f1" : "#fff7e6") : "#fffaf0"};
+  border: 1px solid ${(props) => (props.$passed ? "#b8e0ca" : "#e7c86f")};
   border-radius: 8px;
   color: ${(props) => (props.$passed ? "#26724d" : "#8a5a00")};
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.58);
   font-size: 13px;
   line-height: 1.35;
-  opacity: ${(props) => (props.$visible ? 1 : 0.58)};
+  min-height: 58px;
+  opacity: ${(props) => (props.$visible ? 1 : 0.86)};
   overflow: auto;
   padding: 12px;
 `;

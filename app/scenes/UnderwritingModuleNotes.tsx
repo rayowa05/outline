@@ -170,8 +170,12 @@ const NotesCard = styled.section<{ $mode: "lesson" | "quiz" }>`
   border-top: 4px solid ${brand.blue};
   border-radius: 8px;
   display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   gap: 10px;
+  height: ${(props) => (props.$mode === "lesson" ? "260px" : "auto")};
+  max-height: ${(props) => (props.$mode === "lesson" ? "260px" : "none")};
   min-height: 0;
+  overflow: hidden;
   padding: ${(props) => (props.$mode === "quiz" ? "14px" : "12px")};
   box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
 `;
@@ -226,10 +230,11 @@ const NotesArea = styled.textarea`
   color: ${brand.ink};
   font: inherit;
   font-size: 13px;
+  height: 86px;
   line-height: 1.35;
-  min-height: 96px;
+  min-height: 86px;
   padding: 10px;
-  resize: vertical;
+  resize: none;
   width: 100%;
 
   &:focus {
@@ -271,7 +276,7 @@ const NotesError = styled.div`
 const NotesList = styled.div<{ $mode: "lesson" | "quiz" }>`
   display: grid;
   gap: 8px;
-  max-height: ${(props) => (props.$mode === "quiz" ? "520px" : "260px")};
+  max-height: ${(props) => (props.$mode === "quiz" ? "520px" : "none")};
   min-height: 0;
   overflow: auto;
   padding-right: 2px;

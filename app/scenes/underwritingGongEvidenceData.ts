@@ -37,7 +37,7 @@ export const underwritingGongNarrationSkipsByLesson: Record<
   "2-1": [
     {
       start: 175.818,
-      end: 198.713,
+      end: 201,
       reason:
         "Disqualified Kurt Bell MoonBrew Gong marker; Tactic 2 keeps only Tim Jonas before Cameron.",
     },
@@ -129,9 +129,8 @@ export const underwritingGongEvidenceBySection: Record<
       callId: "8366932099231919914",
       speaker: "Cameron Baker",
       topic: "No UCC, no personal guarantee",
-      prime:
-        "Cameron turns underwriting differentiation into plain language.",
-      lessonStart: 203,
+      prime: "Cameron turns underwriting differentiation into plain language.",
+      lessonStart: 201,
       lessonEnd: 215.385,
       startTimestamp: "15:09.4",
       endTimestamp: "15:50.6",
@@ -229,8 +228,7 @@ export const underwritingGongEvidenceBySection: Record<
       lessonEnd: 153,
       startTimestamp: "8:24.5",
       endTimestamp: "8:40.6",
-      mediaSrc:
-        "/training/underwriting/gong-clips/m2l3-s3-tim-net1-simple.mp4",
+      mediaSrc: "/training/underwriting/gong-clips/m2l3-s3-tim-net1-simple.mp4",
       approvedText:
         "What would we need to get going? Yeah. So for Net-1, super simple, just need you to fill out the application. Takes five, 10 minutes and then email me your EIN document and articles of incorporation and that's literally it for Net-1.",
       status: "approved",
@@ -360,7 +358,7 @@ export const underwritingGongEvidenceBySection: Record<
       topic: "Business underwriting",
       prime:
         "Tim keeps the answer focused on business underwriting, not personal credit.",
-      lessonStart: 132.2,
+      lessonStart: 128,
       lessonEnd: 156.315,
       startTimestamp: "14:32.7",
       endTimestamp: "14:59.1",

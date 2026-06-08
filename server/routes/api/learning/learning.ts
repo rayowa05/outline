@@ -228,8 +228,8 @@ function getProgressPercent(progress: LearningProgressState | null) {
 function hasAnyCourseProgress(progress: LearningProgressState | null) {
   return Boolean(
     progress?.courseStartedAt ||
-      Object.keys(progress?.lessons ?? {}).length ||
-      Object.keys(progress?.quizzes ?? {}).length
+    Object.keys(progress?.lessons ?? {}).length ||
+    Object.keys(progress?.quizzes ?? {}).length
   );
 }
 
@@ -613,6 +613,7 @@ router.post(
     const {
       checkpointCount,
       completedCheckpointIds,
+      failedCheckpointIds,
       lessonCompleted,
       lessonNumber,
       maxWatched,
@@ -654,6 +655,7 @@ router.post(
         [lessonKey]: {
           checkpointCount,
           completedCheckpointCount: completedCheckpointIds.length,
+          failedCheckpointCount: failedCheckpointIds.length,
           lessonCompleted,
           lessonNumber,
           moduleNumber,
@@ -685,6 +687,7 @@ router.post(
       data: {
         checkpointCount,
         completedCheckpointCount: completedCheckpointIds.length,
+        failedCheckpointCount: failedCheckpointIds.length,
         lessonCompleted,
         maxWatched,
         totalDuration,

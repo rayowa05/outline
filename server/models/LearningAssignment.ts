@@ -27,6 +27,7 @@ export interface LearningProgressState {
       lessonCompleted: boolean;
       progressPercent: number;
       completedCheckpointCount: number;
+      failedCheckpointCount?: number;
       checkpointCount: number;
       updatedAt: string;
     }

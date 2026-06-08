@@ -249,6 +249,26 @@ function UnderwritingQuiz() {
       .finally(() => setSubmitting(false));
   };
 
+  const selectAnswer = (questionId: string, optionId: string) => {
+    setAnswers((value) => ({
+      ...value,
+      [questionId]: optionId,
+    }));
+
+    const nextUnansweredIndex = displayQuestions.findIndex(
+      (question, index) => index > activeQuestionIndex && !answers[question.id]
+    );
+
+    if (nextUnansweredIndex >= 0) {
+      setActiveQuestionIndex(nextUnansweredIndex);
+      return;
+    }
+
+    if (activeQuestionIndex < displayQuestions.length - 1) {
+      setActiveQuestionIndex(activeQuestionIndex + 1);
+    }
+  };
+
   const startRetake = () => {
     if (result?.missed.length) {
       setHintedQuestionIds(result.missed.map((item) => item.questionId));
@@ -289,11 +309,22 @@ function UnderwritingQuiz() {
         {error ? <Alert>{error}</Alert> : null}
         {celebrating ? (
           <ConfettiOverlay aria-live="polite">
-            <ConfettiBurst aria-hidden="true">
-              {Array.from({ length: 18 }).map((_, index) => (
-                <span key={index} style={{ "--i": index } as CSSProperties} />
+            <ConfettiRain aria-hidden="true">
+              {Array.from({ length: 88 }).map((_, index) => (
+                <span
+                  key={index}
+                  style={
+                    {
+                      "--i": index,
+                      "--delay": `${(index % 18) * -0.22}s`,
+                      "--drift": `${((index % 9) - 4) * 18}px`,
+                      "--duration": `${3.6 + (index % 8) * 0.32}s`,
+                      "--left": `${(index * 37) % 100}%`,
+                    } as CSSProperties
+                  }
+                />
               ))}
-            </ConfettiBurst>
+            </ConfettiRain>
             <ConfettiMessage>
               Module {quiz.moduleNumber} complete
             </ConfettiMessage>
@@ -451,10 +482,7 @@ function UnderwritingQuiz() {
                           $reviewStatus={status}
                           $selected={selected}
                           onClick={() =>
-                            setAnswers((value) => ({
-                              ...value,
-                              [activeQuestion.id]: option.id,
-                            }))
+                            selectAnswer(activeQuestion.id, option.id)
                           }
                           type="button"
                         >
@@ -548,7 +576,7 @@ function getOptionReviewStatus({
       return "neutral";
     }
 
-    return option.correct ? "correct" : "incorrect";
+    return "selected";
   }
 
   if (option.correct) {
@@ -571,11 +599,15 @@ function shouldShowOptionFeedback({
   result: QuizResult | null;
   selected: boolean;
 }) {
+  if (!result) {
+    return false;
+  }
+
   if (selected) {
     return true;
   }
 
-  return Boolean(result && option.correct);
+  return Boolean(option.correct);
 }
 
 function displayOptionLabel(index: number) {
@@ -642,68 +674,87 @@ const Alert = styled.div`
 
 const ConfettiOverlay = styled.div`
   align-items: center;
-  background: linear-gradient(
-    180deg,
-    rgba(25, 167, 103, 0.1),
-    ${brand.surface} 44%
-  );
-  border: 1px solid ${brand.rule};
-  border-top: 4px solid #19a767;
+  background: rgba(247, 245, 239, 0.88);
+  backdrop-filter: blur(8px);
   border-radius: 8px;
   color: ${brand.ink};
   display: grid;
   gap: 8px;
   justify-items: center;
-  min-height: 112px;
+  inset: 0;
+  min-height: 100vh;
   overflow: hidden;
-  padding: 18px;
-  position: relative;
-  box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
+  padding: 22px;
+  position: fixed;
+  place-content: center;
+  z-index: 20;
+
+  &::before {
+    background: ${brand.surface};
+    border: 1px solid ${brand.rule};
+    border-top: 4px solid #19a767;
+    border-radius: 8px;
+    box-shadow: 0 24px 70px rgba(28, 32, 24, 0.18);
+    content: "";
+    height: 224px;
+    position: absolute;
+    width: min(440px, calc(100vw - 32px));
+    z-index: 1;
+  }
 `;
 
-const ConfettiBurst = styled.div`
-  height: 72px;
-  position: relative;
-  width: 220px;
+const ConfettiRain = styled.div`
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
 
   span {
-    animation: confetti-pop 1.35s ease-out infinite;
+    animation: confetti-fall 4.8s linear infinite;
     background: ${brand.blue};
     border-radius: 2px;
-    height: 10px;
-    left: 50%;
+    height: 16px;
+    left: var(--left);
+    opacity: 0.92;
     position: absolute;
-    top: 48%;
-    transform: rotate(calc(var(--i) * 21deg));
+    top: -32px;
+    transform: rotate(calc(var(--i) * 17deg));
     transform-origin: center;
-    width: 6px;
+    width: 8px;
+    animation-delay: var(--delay);
+    animation-duration: var(--duration);
   }
 
   span:nth-child(3n) {
     background: ${brand.lime};
+    width: 12px;
   }
 
   span:nth-child(4n) {
     background: ${brand.coral};
+    border-radius: 999px;
+    height: 10px;
   }
 
-  @keyframes confetti-pop {
+  span:nth-child(5n) {
+    background: ${brand.purple};
+  }
+
+  @keyframes confetti-fall {
     0% {
       opacity: 0;
-      transform: translate(0, 0) rotate(calc(var(--i) * 21deg)) scale(0.4);
+      transform: translate3d(0, -24px, 0) rotate(0deg);
     }
 
-    20% {
+    10% {
       opacity: 1;
     }
 
     100% {
-      opacity: 0;
-      transform: translate(
-          calc((var(--i) - 9) * 12px),
-          calc(-68px + var(--i) * 4px)
-        )
-        rotate(calc(var(--i) * 47deg)) scale(1);
+      opacity: 0.92;
+      transform: translate3d(var(--drift), calc(100vh + 72px), 0)
+        rotate(calc(360deg + var(--i) * 19deg));
     }
   }
 `;
@@ -714,7 +765,9 @@ const ConfettiMessage = styled.div`
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 0.08em;
+  position: relative;
   text-transform: uppercase;
+  z-index: 2;
 `;
 
 const ConfettiCopy = styled.p`
@@ -722,7 +775,10 @@ const ConfettiCopy = styled.p`
   font-size: 14px;
   line-height: 1.35;
   margin: 0;
+  max-width: 360px;
+  position: relative;
   text-align: center;
+  z-index: 2;
 `;
 
 const ConfettiAction = styled.a`
@@ -736,7 +792,9 @@ const ConfettiAction = styled.a`
   height: 40px;
   justify-content: center;
   padding: 0 16px;
+  position: relative;
   text-decoration: none;
+  z-index: 2;
 
   &:hover {
     text-decoration: none;
