@@ -231,6 +231,10 @@ function UnderwritingModuleCard({
   const state = moduleStates[isLocked ? "locked" : status.state];
   const moduleStartPath = underwritingLessonPath(module.number, 1);
   const accent = moduleAccent(module.number);
+  const hasDocumentReview = module.lessons.some(
+    (lesson) => lesson.kind === "document"
+  );
+  const moduleAction = hasDocumentReview ? "Review job aid" : status.action;
 
   return (
     <ModuleCard
@@ -256,7 +260,10 @@ function UnderwritingModuleCard({
         <CardDescription>{module.summary}</CardDescription>
         <CardFooter data-learning-section="lesson-count">
           <Outcome>
-            <TargetIcon size={14} /> {module.lessonCount} field drills
+            <TargetIcon size={14} />{" "}
+            {hasDocumentReview
+              ? `${module.lessonCount} required review`
+              : `${module.lessonCount} field drills`}
           </Outcome>
           <StatusPill $tone={isLocked ? "muted" : status.tone}>
             {isLocked ? "Locked" : status.label}
@@ -298,7 +305,11 @@ function UnderwritingModuleCard({
               <LessonCopy>
                 <LessonTitle>{lesson.title}</LessonTitle>
                 <LessonMeta>
-                  {lesson.kind === "quiz" ? "Knowledge check" : lesson.duration}
+                  {lesson.kind === "quiz"
+                    ? "Knowledge check"
+                    : lesson.kind === "document"
+                      ? "Job aid review"
+                      : lesson.duration}
                 </LessonMeta>
                 {lesson.note ? <LessonNote>{lesson.note}</LessonNote> : null}
               </LessonCopy>
@@ -318,7 +329,7 @@ function UnderwritingModuleCard({
         </CardAction>
       ) : (
         <CardAction as={Link} to={moduleStartPath}>
-          <SparklesIcon size={14} /> {status.action}
+          <SparklesIcon size={14} /> {moduleAction}
         </CardAction>
       )}
     </ModuleCard>
@@ -385,7 +396,11 @@ const ModuleGrid = styled.div`
   width: 100%;
 
   ${breakpoint("tablet")`
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  `};
+
+  ${breakpoint("desktop")`
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   `};
 `;
 

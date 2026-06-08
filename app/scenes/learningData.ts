@@ -50,11 +50,11 @@ export const underwritingCourse: LearningCourse = {
   eyebrow: "Required AE certification",
   status: "active",
   audience: "Sales, onboarding, and manager coaching",
-  duration: "65 min",
-  moduleCount: 3,
-  lessonCount: 15,
+  duration: "70 min",
+  moduleCount: 4,
+  lessonCount: 16,
   extraItems: "2 required knowledge checks and 1 required job aid",
-  progressLabel: "0 of 3 modules complete",
+  progressLabel: "0 of 4 modules complete",
   description:
     "Build the judgment to qualify advertisers for Dash.fi underwriting, set clean expectations, and submit useful context.",
   modules: [
@@ -202,6 +202,27 @@ export const underwritingCourse: LearningCourse = {
           duration: "2:03",
           kind: "video",
           status: "assetReady",
+        },
+      ],
+    },
+    {
+      number: 4,
+      title: "UW Process Job Aid",
+      subtitle: "Internal underwriting process",
+      status: "assetReady",
+      duration: "5 min",
+      lessonCount: 1,
+      completion: 0,
+      summary:
+        "Review the internal underwriting process job aid and save it in the KB before certification is complete.",
+      lessons: [
+        {
+          number: 1,
+          title: "UW Process/Internal Process",
+          duration: "5 min",
+          kind: "document",
+          status: "assetReady",
+          note: "Required final job aid review. Scroll through the document to complete certification.",
         },
       ],
     },

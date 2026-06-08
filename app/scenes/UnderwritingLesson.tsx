@@ -4,6 +4,8 @@ import { Link, useHistory, useLocation, useParams } from "react-router-dom";
 import {
   type CSSProperties,
   type PointerEvent,
+  type ReactNode,
+  forwardRef,
   useCallback,
   useEffect,
   useMemo,
@@ -65,6 +67,8 @@ const SKILL_CHECK_REPLAY_BUFFER_SECONDS = 5;
 const SKILL_CHECK_MISS_PROMPT =
   "Not quite. This skill check is required to move forward. You can continue the lesson now, but you'll need to replay this section and answer it correctly before completing the lesson.";
 const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5] as const;
+const UNDERWRITING_PROCESS_DOCUMENT_ID = "2m3IlLBz2i";
+const DOCUMENT_REVIEW_DURATION_SECONDS = 300;
 
 type PlaybackRate = (typeof PLAYBACK_RATES)[number];
 type CaptionCue = {
@@ -87,6 +91,37 @@ type LessonOverview = {
   };
   gates?: LessonGate[];
 };
+
+type ProseMirrorMark = {
+  type: string;
+  attrs?: Record<string, string | number | boolean | null | undefined>;
+};
+
+type ProseMirrorNode = {
+  type: string;
+  text?: string;
+  attrs?: Record<string, string | number | boolean | null | undefined>;
+  marks?: ProseMirrorMark[];
+  content?: ProseMirrorNode[];
+};
+
+type JobAidDocument = {
+  data?: ProseMirrorNode;
+  title: string;
+  url?: string;
+};
+
+type DocumentInfoResponse = {
+  data: {
+    document?: JobAidDocument;
+  } & Partial<JobAidDocument>;
+};
+
+function isJobAidDocument(
+  document: Partial<JobAidDocument> | undefined
+): document is JobAidDocument {
+  return typeof document?.title === "string" && document.title.length > 0;
+}
 
 function clearUnderwritingLessonStorage() {
   const prefixes = [
@@ -193,12 +228,20 @@ function UnderwritingLesson() {
   const [serverProgressReconciled, setServerProgressReconciled] =
     useState(false);
   const mediaRef = useRef<HTMLMediaElement | null>(null);
+  const documentReviewRef = useRef<HTMLDivElement | null>(null);
   const internalSeekRef = useRef(false);
   const completionRailAutoSelectedRef = useRef(false);
   const lastSyncedProgressRef = useRef("");
   const lastTriggeredGongClipRef = useRef("");
   const [autoGongClipSrc, setAutoGongClipSrc] = useState<string | null>(null);
   const [isTimelinePlaying, setIsTimelinePlaying] = useState(false);
+  const [jobAidDocument, setJobAidDocument] = useState<JobAidDocument | null>(
+    null
+  );
+  const [documentLoadStatus, setDocumentLoadStatus] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
+  const [documentReviewProgress, setDocumentReviewProgress] = useState(0);
   const pauseGongPlayback = useCallback(() => {
     document
       .querySelectorAll<HTMLMediaElement>("[data-gong-media='true']")
@@ -232,12 +275,17 @@ function UnderwritingLesson() {
   const nextLesson = module?.lessons.find(
     (item) => item.number === activeLesson + 1
   );
+  const nextModule = underwriting?.modules.find(
+    (item) => item.number === activeModule + 1
+  );
+  const nextModuleFirstLesson = nextModule?.lessons[0];
   const finalModule = underwriting?.modules.at(-1);
   const isFinalCourseLesson =
     Boolean(finalModule) &&
     activeModule === finalModule?.number &&
     !nextLesson &&
     Boolean(lesson);
+  const isDocumentLesson = lesson?.kind === "document";
   const lessonKey = `${activeModule}-${activeLesson}`;
   const introStorageKey = `dashfi.learning.underwriting.lesson-intro.${lessonKey}`;
   const production = underwritingLessonProductionData[lessonKey];
@@ -382,12 +430,28 @@ function UnderwritingLesson() {
             meta: `Lesson ${nextLesson.number} of ${module?.lessonCount ?? 0} · ${nextLesson.duration}`,
             title: nextLesson.title,
           }
-        : {
-            href: underwritingTrainingPath(),
-            label: "Course overview",
-            meta: "Return to the module map",
-            title: "Course overview",
-          };
+        : nextModule && nextModuleFirstLesson
+          ? {
+              href:
+                nextModuleFirstLesson.kind === "quiz"
+                  ? underwritingQuizPath(nextModule.number)
+                  : underwritingLessonPath(
+                      nextModule.number,
+                      nextModuleFirstLesson.number
+                    ),
+              label:
+                nextModuleFirstLesson.kind === "quiz"
+                  ? "Take module quiz"
+                  : "Next module",
+              meta: `Module ${nextModule.number} · ${nextModuleFirstLesson.duration}`,
+              title: nextModuleFirstLesson.title,
+            }
+          : {
+              href: underwritingTrainingPath(),
+              label: "Course overview",
+              meta: "Return to the module map",
+              title: "Course overview",
+            };
   const completionModalCopy = hasSkillCheckMiss
     ? {
         body: "You missed one or more required skill checks. Replay from the last completed checkpoint, then answer the missed skill check correctly to unlock the next lesson.",
@@ -534,6 +598,86 @@ function UnderwritingLesson() {
       mounted = false;
     };
   }, [captionsSrc]);
+
+  useEffect(() => {
+    if (!isDocumentLesson) {
+      setJobAidDocument(null);
+      setDocumentLoadStatus("idle");
+      setDocumentReviewProgress(0);
+      return;
+    }
+
+    let mounted = true;
+    setJobAidDocument(null);
+    setDocumentLoadStatus("loading");
+    setDocumentReviewProgress(lessonCompleted ? 100 : 0);
+
+    void client
+      .post<DocumentInfoResponse>("/documents.info", {
+        id: UNDERWRITING_PROCESS_DOCUMENT_ID,
+      })
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
+
+        const document = response.data.document ?? response.data;
+        setJobAidDocument(isJobAidDocument(document) ? document : null);
+        setDocumentLoadStatus(isJobAidDocument(document) ? "ready" : "error");
+      })
+      .catch(() => {
+        if (!mounted) {
+          return;
+        }
+
+        setJobAidDocument(null);
+        setDocumentLoadStatus("error");
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [isDocumentLesson, lessonCompleted, lessonKey]);
+
+  const updateDocumentReviewProgress = useCallback(() => {
+    const node = documentReviewRef.current;
+    if (!node) {
+      return;
+    }
+
+    const scrollableHeight = node.scrollHeight - node.clientHeight;
+    const progress =
+      scrollableHeight <= 8
+        ? 100
+        : Math.min(
+            100,
+            Math.max(
+              0,
+              ((node.scrollTop + node.clientHeight) / node.scrollHeight) * 100
+            )
+          );
+    const reviewTime =
+      (Math.min(100, Math.max(0, progress)) / 100) *
+      (totalDuration || DOCUMENT_REVIEW_DURATION_SECONDS);
+
+    setDocumentReviewProgress(progress);
+    setCurrentTime(reviewTime);
+    setMaxWatched(reviewTime);
+
+    if (progress >= 98) {
+      setLessonCompleted(true);
+    }
+  }, [totalDuration]);
+
+  useEffect(() => {
+    if (!isDocumentLesson || documentLoadStatus !== "ready") {
+      return;
+    }
+
+    const timeout = window.setTimeout(updateDocumentReviewProgress, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [documentLoadStatus, isDocumentLesson, updateDocumentReviewProgress]);
 
   useEffect(() => {
     if (!serverProgressReconciled) {
@@ -1072,6 +1216,7 @@ function UnderwritingLesson() {
                 </StageHeader>
                 <StageBody
                   data-testid="lesson-stage-body"
+                  $documentMode={isDocumentLesson}
                   $gongMode={Boolean(activeGongClip)}
                   $layout={activeLayout}
                   $tone={activeTone}
@@ -1080,6 +1225,7 @@ function UnderwritingLesson() {
                 >
                   {hasWorkflowVideo && workflowVideoExpanded ? null : (
                     <StageCopyPanel
+                      $documentMode={isDocumentLesson}
                       $gongMode={Boolean(activeGongClip)}
                       $layout={activeLayout}
                     >
@@ -1103,13 +1249,22 @@ function UnderwritingLesson() {
                   )}
                   <StageVisual
                     data-testid="lesson-stage-visual"
+                    $documentMode={isDocumentLesson}
                     $gongMode={Boolean(activeGongClip)}
                     $layout={activeLayout}
                     $tone={activeTone}
                     $videoExpanded={hasWorkflowVideo && workflowVideoExpanded}
                     $videoMode={hasWorkflowVideo}
                   >
-                    {media?.videoSrc ? (
+                    {isDocumentLesson ? (
+                      <JobAidReader
+                        document={jobAidDocument}
+                        loadStatus={documentLoadStatus}
+                        onScroll={updateDocumentReviewProgress}
+                        progress={documentReviewProgress}
+                        ref={documentReviewRef}
+                      />
+                    ) : media?.videoSrc ? (
                       <WorkflowVideoPlayer
                         ref={setMainMediaRef}
                         controls={reviewMode}
@@ -1162,7 +1317,7 @@ function UnderwritingLesson() {
                     )}
                   </StageVisual>
                 </StageBody>
-                {media?.audioSrc || media?.videoSrc ? (
+                {!isDocumentLesson && (media?.audioSrc || media?.videoSrc) ? (
                   <TimelineDock>
                     <TimelinePlayButton
                       aria-label={
@@ -1267,7 +1422,7 @@ function UnderwritingLesson() {
                     Review mode
                   </ReviewModeBadge>
                 ) : null}
-                {media?.videoSrc ? null : (
+                {!isDocumentLesson && !media?.videoSrc ? (
                   <AudioDock>
                     {media?.audioSrc ? (
                       <AudioPlayer
@@ -1321,7 +1476,7 @@ function UnderwritingLesson() {
                       </MediaMissing>
                     )}
                   </AudioDock>
-                )}
+                ) : null}
                 <StageProgress aria-hidden="true">
                   <StageProgressFill style={{ width: `${progressValue}%` }} />
                 </StageProgress>
@@ -1329,13 +1484,20 @@ function UnderwritingLesson() {
               {startModalVisible ? (
                 <LessonModalOverlay data-testid="lesson-start-modal">
                   <LessonModalPanel>
-                    <LessonModalKicker>Before you start</LessonModalKicker>
-                    <LessonModalTitle>Take notes as you go.</LessonModalTitle>
+                    <LessonModalKicker>
+                      {isDocumentLesson
+                        ? "Required job aid"
+                        : "Before you start"}
+                    </LessonModalKicker>
+                    <LessonModalTitle>
+                      {isDocumentLesson
+                        ? "Review the internal process."
+                        : "Take notes as you go."}
+                    </LessonModalTitle>
                     <LessonModalCopy>
-                      Your Module {module.number} notes stay with you across
-                      this module and will be available during the quiz. You
-                      need 100% to pass, so capture the signals, examples, and
-                      tactics as you go.
+                      {isDocumentLesson
+                        ? "Scroll through the UW Process/Internal Process job aid and star or save it in the KB. This review is required before certification is complete."
+                        : `Your Module ${module.number} notes stay with you across this module and will be available during the quiz. You need 100% to pass, so capture the signals, examples, and tactics as you go.`}
                     </LessonModalCopy>
                     <LessonModalButton
                       onClick={() => {
@@ -1351,7 +1513,7 @@ function UnderwritingLesson() {
                       }}
                       type="button"
                     >
-                      Start lesson
+                      {isDocumentLesson ? "Start review" : "Start lesson"}
                     </LessonModalButton>
                   </LessonModalPanel>
                 </LessonModalOverlay>
@@ -1530,20 +1692,6 @@ function UnderwritingLesson() {
                     </NextLessonButton>
                   )}
                 </RailNextUp>
-                {production?.jobAid ? (
-                  <JobAidBlock data-testid="lesson-job-aid">
-                    <JobAidEyebrow>Required job aid</JobAidEyebrow>
-                    <JobAidTitle>{production.jobAid.title}</JobAidTitle>
-                    <JobAidCopy>{production.jobAid.requirement}</JobAidCopy>
-                    <JobAidLink
-                      href={production.jobAid.href}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      Open job aid
-                    </JobAidLink>
-                  </JobAidBlock>
-                ) : null}
               </RailPanel>
 
               <RailPanel
@@ -1670,6 +1818,76 @@ function UnderwritingLesson() {
   );
 }
 
+const JobAidReader = forwardRef<
+  HTMLDivElement,
+  {
+    document: JobAidDocument | null;
+    loadStatus: "idle" | "loading" | "ready" | "error";
+    onScroll: () => void;
+    progress: number;
+  }
+>(function JobAidReader({ document, loadStatus, onScroll, progress }, ref) {
+  const documentUrl =
+    document?.url ??
+    `/doc/uw-process-internal-process-${UNDERWRITING_PROCESS_DOCUMENT_ID}`;
+
+  if (loadStatus === "loading" || loadStatus === "idle") {
+    return (
+      <JobAidReaderShell>
+        <JobAidReaderState>Loading required job aid...</JobAidReaderState>
+      </JobAidReaderShell>
+    );
+  }
+
+  if (loadStatus === "error" || !document) {
+    return (
+      <JobAidReaderShell>
+        <JobAidReaderState>
+          The job aid could not be loaded inside the training player.
+          <JobAidReaderLink href={documentUrl} rel="noreferrer" target="_blank">
+            Open the KB job aid
+          </JobAidReaderLink>
+        </JobAidReaderState>
+      </JobAidReaderShell>
+    );
+  }
+
+  return (
+    <JobAidReaderShell>
+      <JobAidReaderHeader>
+        <div>
+          <JobAidReaderKicker>Required job aid</JobAidReaderKicker>
+          <JobAidReaderTitle>{document.title}</JobAidReaderTitle>
+        </div>
+        <JobAidReaderLink href={documentUrl} rel="noreferrer" target="_blank">
+          Open in KB
+        </JobAidReaderLink>
+      </JobAidReaderHeader>
+      <JobAidProgress aria-label="Job aid review progress">
+        <JobAidProgressFill style={{ width: `${Math.min(100, progress)}%` }} />
+      </JobAidProgress>
+      <JobAidReaderBody
+        data-testid="job-aid-reader"
+        onScroll={onScroll}
+        ref={ref}
+      >
+        <JobAidDocumentBody>
+          {document.data ? (
+            renderProseMirrorNode(document.data, "job-aid-root")
+          ) : (
+            <p>Review the UW Process/Internal Process document in the KB.</p>
+          )}
+        </JobAidDocumentBody>
+      </JobAidReaderBody>
+      <JobAidReaderFooter $complete={progress >= 98}>
+        {progress >= 98
+          ? "Review complete. You can continue."
+          : "Scroll to the bottom of the job aid to complete this module."}
+      </JobAidReaderFooter>
+    </JobAidReaderShell>
+  );
+});
+
 function CheckpointOverlay({
   checkpoint,
   feedback,
@@ -1731,6 +1949,114 @@ function CheckpointOverlay({
       </CheckpointModalCard>
     </CheckpointModal>
   );
+}
+
+function renderProseMirrorNode(node: ProseMirrorNode, key: string): ReactNode {
+  const children = renderProseMirrorChildren(node, key);
+
+  if (node.type === "doc") {
+    return <>{children}</>;
+  }
+
+  if (node.type === "text") {
+    return renderTextWithMarks(node.text ?? "", node.marks, key);
+  }
+
+  if (node.type === "paragraph") {
+    return <p key={key}>{children.length ? children : <br />}</p>;
+  }
+
+  if (node.type === "heading") {
+    const level = Math.min(3, Math.max(2, Number(node.attrs?.level ?? 2)));
+    const HeadingTag = `h${level}` as "h2" | "h3";
+
+    return <HeadingTag key={key}>{children}</HeadingTag>;
+  }
+
+  if (node.type === "bulletList") {
+    return <ul key={key}>{children}</ul>;
+  }
+
+  if (node.type === "orderedList") {
+    return <ol key={key}>{children}</ol>;
+  }
+
+  if (node.type === "listItem") {
+    return <li key={key}>{children}</li>;
+  }
+
+  if (node.type === "blockquote") {
+    return <blockquote key={key}>{children}</blockquote>;
+  }
+
+  if (node.type === "codeBlock") {
+    return <pre key={key}>{node.text ?? children}</pre>;
+  }
+
+  if (node.type === "horizontalRule") {
+    return <hr key={key} />;
+  }
+
+  if (node.type === "hardBreak") {
+    return <br key={key} />;
+  }
+
+  if (node.type === "image" && typeof node.attrs?.src === "string") {
+    return (
+      <img
+        alt={typeof node.attrs.alt === "string" ? node.attrs.alt : ""}
+        key={key}
+        src={node.attrs.src}
+      />
+    );
+  }
+
+  return children.length ? <div key={key}>{children}</div> : null;
+}
+
+function renderProseMirrorChildren(node: ProseMirrorNode, key: string) {
+  return (
+    node.content?.map((child, index) =>
+      renderProseMirrorNode(child, `${key}-${index}`)
+    ) ?? []
+  );
+}
+
+function renderTextWithMarks(
+  text: string,
+  marks: ProseMirrorMark[] | undefined,
+  key: string
+): ReactNode {
+  return (marks ?? []).reduce<ReactNode>((content, mark, index) => {
+    const markKey = `${key}-mark-${index}`;
+
+    if (mark.type === "strong" || mark.type === "bold") {
+      return <strong key={markKey}>{content}</strong>;
+    }
+
+    if (mark.type === "em" || mark.type === "italic") {
+      return <em key={markKey}>{content}</em>;
+    }
+
+    if (mark.type === "code") {
+      return <code key={markKey}>{content}</code>;
+    }
+
+    if (mark.type === "link" && typeof mark.attrs?.href === "string") {
+      return (
+        <a
+          href={mark.attrs.href}
+          key={markKey}
+          rel="noreferrer"
+          target="_blank"
+        >
+          {content}
+        </a>
+      );
+    }
+
+    return content;
+  }, text);
 }
 
 function getActiveSection(sections: LessonSection[], time: number) {
@@ -3228,6 +3554,11 @@ function orderCheckpointOptions(checkpoint: LessonCheckpoint, seed: string) {
 }
 
 function parseDuration(duration: string) {
+  const minuteMatch = duration.match(/^(\d+(?:\.\d+)?)\s*min/i);
+  if (minuteMatch) {
+    return Number(minuteMatch[1]) * 60;
+  }
+
   const [minutes = "0", seconds = "0"] = duration.split(":");
   return Number(minutes) * 60 + Number(seconds);
 }
@@ -3360,6 +3691,7 @@ const StageTime = styled.div`
 `;
 
 const StageBody = styled.div<{
+  $documentMode?: boolean;
   $gongMode?: boolean;
   $layout: SlideLayout;
   $tone: SlideTone;
@@ -3384,40 +3716,50 @@ const StageBody = styled.div<{
   grid-template-columns: minmax(0, 1fr);
   min-height: 0;
   padding: ${(props) =>
-    props.$videoMode ? "16px 18px 22px" : "24px 28px 104px"};
+    props.$documentMode
+      ? "18px"
+      : props.$videoMode
+        ? "16px 18px 22px"
+        : "24px 28px 104px"};
 
   ${breakpoint("tablet")`
     grid-template-columns: ${(props: {
       $gongMode?: boolean;
+      $documentMode?: boolean;
       $layout: SlideLayout;
       $videoExpanded?: boolean;
       $videoMode?: boolean;
     }) =>
       props.$videoExpanded
         ? "minmax(0, 1fr)"
-        : props.$videoMode
-          ? "minmax(0, 0.55fr) minmax(420px, 1.45fr)"
-          : props.$gongMode
-            ? "minmax(0, 1fr)"
-            : props.$layout === "visualLead"
-              ? "minmax(0, 1.08fr) minmax(0, 0.92fr)"
-              : props.$layout === "metricLead"
-                ? "minmax(0, 0.66fr) minmax(0, 1.34fr)"
-                : "minmax(0, 0.82fr) minmax(0, 1fr)"};
+        : props.$documentMode
+          ? "minmax(0, 1fr)"
+          : props.$videoMode
+            ? "minmax(0, 0.55fr) minmax(420px, 1.45fr)"
+            : props.$gongMode
+              ? "minmax(0, 1fr)"
+              : props.$layout === "visualLead"
+                ? "minmax(0, 1.08fr) minmax(0, 0.92fr)"
+                : props.$layout === "metricLead"
+                  ? "minmax(0, 0.66fr) minmax(0, 1.34fr)"
+                  : "minmax(0, 0.82fr) minmax(0, 1fr)"};
   `};
 `;
 
 const StageCopyPanel = styled.div<{
+  $documentMode?: boolean;
   $gongMode?: boolean;
   $layout: SlideLayout;
 }>`
   align-content: center;
-  display: ${(props) => (props.$gongMode ? "none" : "grid")};
+  display: ${(props) =>
+    props.$gongMode || props.$documentMode ? "none" : "grid"};
   min-width: 0;
   order: ${(props) => (props.$layout === "visualLead" ? 2 : 1)};
 `;
 
 const StageVisual = styled.div<{
+  $documentMode?: boolean;
   $gongMode?: boolean;
   $layout: SlideLayout;
   $tone: SlideTone;
@@ -3426,32 +3768,41 @@ const StageVisual = styled.div<{
 }>`
   align-self: stretch;
   background: ${(props) =>
-    props.$videoMode
-      ? "rgba(255, 255, 255, 0.055)"
-      : props.$tone === "light"
-        ? brand.surface
-        : props.$tone === "blue"
-          ? "rgba(53, 76, 239, 0.26)"
-          : props.$tone === "lime"
-            ? "rgba(237, 255, 61, 0.12)"
-            : props.$tone === "violet"
-              ? "rgba(124, 77, 255, 0.22)"
-              : "rgba(255, 255, 255, 0.055)"};
+    props.$documentMode
+      ? brand.surface
+      : props.$videoMode
+        ? "rgba(255, 255, 255, 0.055)"
+        : props.$tone === "light"
+          ? brand.surface
+          : props.$tone === "blue"
+            ? "rgba(53, 76, 239, 0.26)"
+            : props.$tone === "lime"
+              ? "rgba(237, 255, 61, 0.12)"
+              : props.$tone === "violet"
+                ? "rgba(124, 77, 255, 0.22)"
+                : "rgba(255, 255, 255, 0.055)"};
   border: 1px solid rgba(255, 255, 255, 0.17);
   border-radius: 8px;
   display: grid;
-  min-height: ${(props) => (props.$videoMode ? "0" : "260px")};
+  min-height: ${(props) =>
+    props.$documentMode
+      ? "min(68vh, 760px)"
+      : props.$videoMode
+        ? "0"
+        : "260px"};
   min-width: 0;
   order: ${(props) => (props.$layout === "visualLead" ? 1 : 2)};
   overflow: hidden;
   padding: ${(props) =>
-    props.$videoMode
+    props.$documentMode
       ? "0"
-      : props.$gongMode
-        ? "14px"
-        : props.$layout === "metricLead"
-          ? "24px 24px 86px"
-          : "20px 20px 86px"};
+      : props.$videoMode
+        ? "0"
+        : props.$gongMode
+          ? "14px"
+          : props.$layout === "metricLead"
+            ? "24px 24px 86px"
+            : "20px 20px 86px"};
   position: relative;
 
   &::after {
@@ -3464,7 +3815,9 @@ const StageVisual = styled.div<{
     position: absolute;
     right: 0;
     display: ${(props) =>
-      props.$videoMode || props.$gongMode ? "none" : "block"};
+      props.$documentMode || props.$videoMode || props.$gongMode
+        ? "none"
+        : "block"};
   }
 `;
 
@@ -5340,6 +5693,169 @@ const MediaMissing = styled.div`
   padding: 12px 14px;
 `;
 
+const JobAidReaderShell = styled.div`
+  background: ${brand.surface};
+  color: ${brand.ink};
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: min(68vh, 760px);
+  min-width: 0;
+`;
+
+const JobAidReaderHeader = styled.div`
+  align-items: center;
+  border-bottom: 1px solid ${brand.rule};
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+`;
+
+const JobAidReaderKicker = styled.div`
+  color: ${brand.purple};
+  font-family: ${brand.mono};
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+`;
+
+const JobAidReaderTitle = styled.h2`
+  color: ${brand.ink};
+  font-size: 22px;
+  letter-spacing: 0;
+  line-height: 1.15;
+  margin: 0;
+`;
+
+const JobAidReaderLink = styled.a`
+  align-items: center;
+  background: ${brand.dark};
+  border-radius: 7px;
+  color: #fff;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-family: ${brand.mono};
+  font-size: 11px;
+  font-weight: 800;
+  height: 34px;
+  justify-content: center;
+  letter-spacing: 0.06em;
+  padding: 0 12px;
+  text-decoration: none;
+  text-transform: uppercase;
+`;
+
+const JobAidProgress = styled.div`
+  background: #e9e5da;
+  height: 6px;
+  overflow: hidden;
+`;
+
+const JobAidProgressFill = styled.div`
+  background: linear-gradient(90deg, ${brand.purple}, ${brand.blue});
+  height: 100%;
+  transition: width 140ms ease;
+`;
+
+const JobAidReaderBody = styled.div`
+  min-height: 0;
+  overflow-y: auto;
+  padding: 22px;
+`;
+
+const JobAidDocumentBody = styled.article`
+  color: ${brand.ink};
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 840px;
+
+  h2,
+  h3 {
+    color: ${brand.ink};
+    letter-spacing: 0;
+    line-height: 1.16;
+    margin: 24px 0 10px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  h3 {
+    font-size: 19px;
+  }
+
+  p {
+    margin: 0 0 12px;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 14px 22px;
+    padding: 0;
+  }
+
+  li {
+    margin: 5px 0;
+  }
+
+  a {
+    color: ${brand.blue};
+    font-weight: 700;
+  }
+
+  code {
+    background: ${brand.mutedBlock};
+    border-radius: 4px;
+    font-family: ${brand.mono};
+    font-size: 0.92em;
+    padding: 2px 4px;
+  }
+
+  blockquote {
+    border-left: 4px solid ${brand.purple};
+    color: ${brand.muted};
+    margin: 18px 0;
+    padding: 4px 0 4px 14px;
+  }
+
+  img {
+    border: 1px solid ${brand.rule};
+    border-radius: 8px;
+    display: block;
+    height: auto;
+    margin: 16px 0;
+    max-width: 100%;
+  }
+`;
+
+const JobAidReaderFooter = styled.div<{ $complete?: boolean }>`
+  background: ${(props) => (props.$complete ? brand.mint : brand.lavender)};
+  border-top: 1px solid ${brand.rule};
+  color: ${(props) => (props.$complete ? "#1f6f49" : brand.blue)};
+  font-family: ${brand.mono};
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 11px 20px;
+  text-transform: uppercase;
+`;
+
+const JobAidReaderState = styled.div`
+  align-content: center;
+  color: ${brand.muted};
+  display: grid;
+  font-size: 14px;
+  gap: 12px;
+  justify-items: start;
+  min-height: 320px;
+  padding: 24px;
+`;
+
 const LessonRail = styled.section`
   background: ${brand.surface};
   border: 1px solid ${brand.rule};
@@ -5467,62 +5983,6 @@ const ObjectiveList = styled.ul`
     height: 8px;
     margin-top: 6px;
     width: 8px;
-  }
-`;
-
-const JobAidBlock = styled.div`
-  background: linear-gradient(
-    180deg,
-    rgba(53, 76, 239, 0.06),
-    ${brand.surface} 44%
-  );
-  border: 1px solid rgba(32, 48, 45, 0.1);
-  border-top: 4px solid ${brand.blue};
-  border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  margin-top: 14px;
-  padding: 12px;
-  box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
-`;
-
-const JobAidEyebrow = styled.div`
-  color: ${brand.muted};
-  font-family: ${brand.mono};
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-`;
-
-const JobAidTitle = styled.div`
-  color: ${brand.ink};
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1.25;
-`;
-
-const JobAidCopy = styled.p`
-  color: ${brand.muted};
-  font-size: 14px;
-  line-height: 1.35;
-  margin: 0;
-`;
-
-const JobAidLink = styled.a`
-  align-items: center;
-  color: ${brand.blue};
-  display: inline-flex;
-  font-family: ${brand.mono};
-  font-size: 12px;
-  font-weight: 800;
-  justify-self: start;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  text-transform: uppercase;
-
-  &:hover {
-    text-decoration: underline;
   }
 `;
 
