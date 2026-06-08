@@ -3,10 +3,11 @@ import { addMonths } from "date-fns";
 import Koa from "koa";
 import bodyParser from "koa-body";
 import Router from "koa-router";
+import env from "@server/env";
 import { AuthenticationError } from "@server/errors";
 import authMiddleware from "@server/middlewares/authentication";
 import coalesceBody from "@server/middlewares/coaleseBody";
-import { Collection, Team, View } from "@server/models";
+import { Collection, Team, User, View } from "@server/models";
 import AuthenticationHelper from "@server/models/helpers/AuthenticationHelper";
 import type { AppState, AppContext, APIContext } from "@server/types";
 import { AuthenticationType } from "@server/types";
@@ -17,6 +18,30 @@ const app = new Koa<AppState, AppContext>();
 const router = new Router();
 
 router.use(passport.initialize());
+
+router.get("/dev-ray", async (ctx: APIContext) => {
+  if (env.isProduction) {
+    throw AuthenticationError("Development login is disabled");
+  }
+
+  const user = await User.scope("withTeam").findOne({
+    where: {
+      email: "ray@dash.fi",
+    },
+  });
+
+  if (!user) {
+    throw AuthenticationError("Ray user not found");
+  }
+
+  const expires = addMonths(new Date(), 3);
+
+  ctx.cookies.set("accessToken", user.getSessionToken(expires, "dev-ray"), {
+    sameSite: "lax",
+    expires,
+  });
+  ctx.redirect("/learning");
+});
 
 // dynamically register available authentication provider routes
 void (async () => {

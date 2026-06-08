@@ -1,0 +1,325 @@
+1
+00:00:00,000 --> 00:00:02,555
+Getting Ahead of Customer Concerns.
+
+2
+00:00:02,555 --> 00:00:08,152
+There's a moment on every discovery call
+when you'll ask the prospect to take the
+
+3
+00:00:08,152 --> 00:00:13,049
+next step — fill out the application,
+connect their bank account, share
+
+4
+00:00:13,049 --> 00:00:18,505
+financial documents. How you frame that
+ask determines whether concerns surface
+
+5
+00:00:18,505 --> 00:00:18,995
+at all.
+
+6
+00:00:18,995 --> 00:00:24,370
+Listen to this exchange between Andy
+Murphy and a solo founder named Matthew
+
+7
+00:00:24,370 --> 00:00:24,800
+Krick:
+
+8
+00:00:24,800 --> 00:00:32,286
+Matthew asks
+what financial documents are needed. Andy
+
+9
+00:00:32,286 --> 00:00:39,587
+separates the two paths: "If you wanted
+something like a net seven or net 15, we
+
+10
+00:00:39,587 --> 00:00:46,981
+typically do require 24 months of P&L and
+balance sheet in monthly Excel format —
+
+11
+00:00:46,981 --> 00:00:54,282
+they don't need to be audited. It could
+just be management accounts or an export
+
+12
+00:00:54,282 --> 00:01:01,122
+from your accounting software. And if you
+just want Net-1, we don't require
+
+13
+00:01:01,122 --> 00:01:02,323
+financials.".
+
+14
+00:01:02,323 --> 00:01:07,541
+Matthew says he prepares his own books
+and isn't comfortable sharing them since
+
+15
+00:01:07,541 --> 00:01:12,959
+they're not professionally prepared. Andy
+doesn't push: "That's perfectly fine. We
+
+16
+00:01:12,959 --> 00:01:17,843
+have a very high success rate on our
+Net-1. What we can always do is start
+
+17
+00:01:17,843 --> 00:01:23,262
+with the Net-1. If you're able to get it
+submitted by end of day tomorrow, I could
+
+18
+00:01:23,262 --> 00:01:28,145
+have limits underwritten by Thursday and
+we could do an onboarding call on
+
+19
+00:01:28,145 --> 00:01:28,747
+Friday.".
+
+20
+00:01:28,747 --> 00:01:30,605
+Matthew commits to Friday.
+
+21
+00:01:30,605 --> 00:01:33,206
+Three things happen in that exchange.
+
+22
+00:01:33,206 --> 00:01:38,500
+One: Andy separates Net-1 from float
+before any concern can build.
+
+23
+00:01:38,500 --> 00:01:43,670
+Two: He simplifies the financial
+documents ask — "don't need to be
+
+24
+00:01:43,670 --> 00:01:46,534
+audited, just management accounts.".
+
+25
+00:01:46,534 --> 00:01:52,506
+And Three: When Matthew expresses
+discomfort, he pivots to Net-1 with an
+
+26
+00:01:52,506 --> 00:01:54,104
+immediate timeline.
+
+27
+00:01:54,104 --> 00:01:59,261
+The prospect never felt pushed, and the
+deal moved forward. Here are the three
+
+28
+00:01:59,261 --> 00:02:00,466
+tactics behind it.
+
+29
+00:02:00,466 --> 00:02:03,624
+**Tactic one: minimize the ask.**.
+
+30
+00:02:03,624 --> 00:02:08,217
+When you describe the application
+process, lead with how lightweight it is.
+
+31
+00:02:08,217 --> 00:02:10,265
+Tim Jonas does this consistently:
+
+32
+00:02:10,265 --> 00:02:18,553
+"For net one,
+super simple, just need you to fill out
+
+33
+00:02:18,553 --> 00:02:26,634
+the application, takes five, 10 minutes
+and then email me your EIN document and
+
+34
+00:02:26,634 --> 00:02:33,161
+articles of incorporation and that's
+literally it for net one.".
+
+35
+00:02:33,161 --> 00:02:37,407
+Dave Beddingfield adds something the
+other AEs don't — he removes the
+
+36
+00:02:37,407 --> 00:02:38,594
+commitment concern:
+
+37
+00:02:38,594 --> 00:02:47,412
+"The
+application takes 10 minutes, it's not a
+
+38
+00:02:47,412 --> 00:02:53,780
+legal contract or binding you to any type
+of spend.".
+
+39
+00:02:53,780 --> 00:02:58,433
+Dave pairs the time investment with the
+risk reduction on every call. The
+
+40
+00:02:58,433 --> 00:03:03,021
+prospect hears: "This costs you 10
+minutes and commits you to nothing.".
+
+41
+00:03:03,021 --> 00:03:06,550
+**Tactic two: separate easy from hard.**.
+
+42
+00:03:06,550 --> 00:03:11,821
+When float comes up, separate it from
+Net-1 before the prospect has a chance to
+
+43
+00:03:11,821 --> 00:03:14,862
+feel overwhelmed by the document
+requirements.
+
+44
+00:03:14,862 --> 00:03:23,861
+Andy Murphy on a call with Prenetics:
+"We don't
+
+45
+00:03:23,861 --> 00:03:29,212
+require financials for the net one
+product.".
+
+46
+00:03:29,212 --> 00:03:34,178
+The prospect hears "easy" before they
+hear "documents." If Net-1 is all they
+
+47
+00:03:34,178 --> 00:03:39,606
+need, the concern never surfaces. If they
+want float, the heavier requirement comes
+
+48
+00:03:39,606 --> 00:03:44,241
+after they're already engaged. And when
+you do mention float documents,
+
+49
+00:03:44,241 --> 00:03:49,339
+de-stigmatize them — "don't need to be
+audited, just management accounts or an
+
+50
+00:03:49,339 --> 00:03:51,921
+export from your accounting software.".
+
+51
+00:03:51,921 --> 00:03:55,218
+**Tactic three: say it before they
+ask.**.
+
+52
+00:03:55,218 --> 00:04:00,115
+The concerns prospects have about
+personal guarantees and credit checks
+
+53
+00:04:00,115 --> 00:04:05,712
+don't go away just because you mentioned
+them in your positioning. If you address
+
+54
+00:04:05,712 --> 00:04:11,028
+them proactively when presenting the
+application, the concern resolves before
+
+55
+00:04:11,028 --> 00:04:11,658
+it forms.
+
+56
+00:04:11,658 --> 00:04:17,881
+Cameron Baker does this on a call with
+Healthycell — a deal that closed at
+
+57
+00:04:17,881 --> 00:04:18,392
+$450K:
+
+58
+00:04:18,392 --> 00:04:27,415
+Early in the
+call, Cameron states: "The reason behind
+
+59
+00:04:27,415 --> 00:04:36,663
+that is because we don't require any UCCs
+or liens on the business or even personal
+
+60
+00:04:36,663 --> 00:04:38,129
+guarantees.".
+
+61
+00:04:38,129 --> 00:04:44,808
+Later, the prospect asks directly: "So,
+no personal guarantees and no UCC?"
+
+62
+00:04:44,808 --> 00:04:49,321
+Cameron confirms: "No personal guarantee.
+No UCC.".
+
+63
+00:04:49,321 --> 00:04:55,295
+Two words. The concern was already
+handled — Cameron set it up earlier in
+
+64
+00:04:55,295 --> 00:05:01,767
+the call. By the time the prospect asked,
+it was a confirmation, not a concern.
+
+65
+00:05:01,767 --> 00:05:07,018
+The through-line across all three
+tactics: address the concern before it
+
+66
+00:05:07,018 --> 00:05:12,416
+becomes one. Minimize the ask, separate
+easy from hard, and say the things
+
+67
+00:05:12,416 --> 00:05:18,480
+prospects worry about before they have to
+ask. When you do this well, most concerns
+
+68
+00:05:18,480 --> 00:05:24,249
+never surface — and the ones that do are
+easier to handle. That's what the next
+
+69
+00:05:24,249 --> 00:05:25,358
+section covers.

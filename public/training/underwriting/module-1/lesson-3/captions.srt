@@ -1,0 +1,277 @@
+1
+00:00:00,000 --> 00:00:02,414
+How the Underwriting Team Evaluates.
+
+2
+00:00:02,414 --> 00:00:08,249
+Not every deal goes through the same
+level of underwriting. A Net-1 card is
+
+3
+00:00:08,249 --> 00:00:13,848
+evaluated differently than a Net-30 or
+Net-60 card — because the risk is
+
+4
+00:00:13,848 --> 00:00:19,763
+different. On Net-1, the company spends
+today and we debit tomorrow. For the
+
+5
+00:00:19,763 --> 00:00:25,756
+Net1, the primary question is simple: do
+they have enough cash in the bank to
+
+6
+00:00:25,756 --> 00:00:31,670
+cover daily spend? That's why Net-1
+doesn't require a balance sheet or P&L —
+
+7
+00:00:31,670 --> 00:00:37,821
+just a connected bank account, EIN, and
+KYC verification. As Tim Jonas puts it:
+
+8
+00:00:37,821 --> 00:00:43,420
+"If you have cash in the bank, you're
+going to get approved for Net-1.".
+
+9
+00:00:43,420 --> 00:00:48,752
+Extended terms are a different
+conversation. On Net-15 or Net-30, we're
+
+10
+00:00:48,752 --> 00:00:54,009
+carrying days or weeks of credit
+exposure. That means the underwriting
+
+11
+00:00:54,009 --> 00:01:00,027
+team needs to see 24 months of P&L and
+balance sheet — in monthly Excel format —
+
+12
+00:01:00,027 --> 00:01:05,588
+because they're answering a harder
+question: can this company reliably pay
+
+13
+00:01:05,588 --> 00:01:09,473
+us back over time? Here's how that
+evaluation works.
+
+14
+00:01:09,473 --> 00:01:14,717
+The Underwriting team gets on a call with
+a prospect. They already read their
+
+15
+00:01:14,717 --> 00:01:20,236
+financials and even if the numbers aren't
+great they pick up the phone because as
+
+16
+00:01:20,236 --> 00:01:23,962
+they put it — "the numbers don't tell the
+full story.".
+
+17
+00:01:23,962 --> 00:01:29,662
+The conversation follows a very specific
+pattern — four things they look at every
+
+18
+00:01:29,662 --> 00:01:35,007
+time: cash runway, current ratio, debt
+structure, and revenue trajectory. In
+
+19
+00:01:35,007 --> 00:01:40,137
+some cases they will ask about the
+corporate structure. Learn these five,
+
+20
+00:01:40,137 --> 00:01:45,695
+and you'll know what the Underwriting
+team is going to ask before they asks it.
+
+21
+00:01:45,695 --> 00:01:52,479
+One: cash runway. This is Underwritings's
+North Star. They want to see 12 months of
+
+22
+00:01:52,479 --> 00:01:59,097
+cash on hand for any prospect requesting
+extended terms. This is the bank balance
+
+23
+00:01:59,097 --> 00:02:05,220
+relative to the credit limit being
+requested. A prospect asking for a $500K
+
+24
+00:02:05,220 --> 00:02:11,259
+daily limit on Net-30 should have
+significantly more than $500K sitting in
+
+25
+00:02:11,259 --> 00:02:17,547
+the bank. If you're on a discovery call
+and the prospect says they have three
+
+26
+00:02:17,547 --> 00:02:24,082
+months of runway, you can rest assured
+that a Net-30 won't be feasible. It'll be
+
+27
+00:02:24,082 --> 00:02:29,791
+a Net-1 application, with a path to
+upgrade later on should the runway
+
+28
+00:02:29,791 --> 00:02:30,370
+extend.
+
+29
+00:02:30,370 --> 00:02:36,179
+Two: current ratio. This is a company's
+current assets divided by current
+
+30
+00:02:36,179 --> 00:02:42,715
+liabilities. A weak current ratio is the
+fastest way to not qualify for Net-30 and
+
+31
+00:02:42,715 --> 00:02:48,524
+above. If the prospect can't cover their
+near-term obligations with their
+
+32
+00:02:48,524 --> 00:02:54,333
+near-term assets, extending 30 days of
+float adds risk they can't absorb.
+
+33
+00:02:54,333 --> 00:03:01,043
+Three: debt structure. The Underwriting
+team always asks about existing financing
+
+34
+00:03:01,043 --> 00:03:07,585
+— Wayflyer, Settle, Clearco, lines of
+credit. Having them isn't a disqualifier.
+
+35
+00:03:07,585 --> 00:03:14,127
+They want to know if they're being paid
+down or re-upped. Feelgoods raised $4.5
+
+36
+00:03:14,127 --> 00:03:20,753
+million and put 95% of it toward paying
+off Wayflyer and Settle, with $3 million
+
+37
+00:03:20,753 --> 00:03:27,128
+remaining and no plans to re-up those
+facilities. The Underwriting team heard
+
+38
+00:03:27,128 --> 00:03:33,083
+that and it was a green light. Active
+debt that's shrinking is a sign of
+
+39
+00:03:33,083 --> 00:03:38,870
+financial discipline. Debt that keeps
+growing is a sign of dependency.
+
+40
+00:03:38,870 --> 00:03:43,972
+Four: revenue trajectory. We won't just
+look at this quarter's revenue.
+
+41
+00:03:43,972 --> 00:03:49,511
+Underwriting is looking to see if the
+prospect trending toward profitability,
+
+42
+00:03:49,511 --> 00:03:55,196
+or burning cash and working towards a
+fundraise? The path towards profitability
+
+43
+00:03:55,196 --> 00:04:00,735
+comes in different shapes and sizes. A
+company losing money on a clear upward
+
+44
+00:04:00,735 --> 00:04:04,598
+path is different from one losing money
+on a flatline.
+
+45
+00:04:04,598 --> 00:04:11,098
+Five: corporate structure. For prospects
+with parent entities, holding companies,
+
+46
+00:04:11,098 --> 00:04:17,679
+or incubators, The Underwriting team will
+explore whether the parent can guarantee
+
+47
+00:04:17,679 --> 00:04:23,610
+the application. Fridays Health's
+standalone financials showed a $10M loss
+
+48
+00:04:23,610 --> 00:04:29,622
+and negative net asset position — not
+approvable on their own. But if their
+
+49
+00:04:29,622 --> 00:04:35,797
+parent company, Openloop Healthcare,
+could provide financials or a guarantee.
+
+50
+00:04:35,797 --> 00:04:41,971
+Reid, on the underwriting team asked for
+exactly that. This is why asking "Is
+
+51
+00:04:41,971 --> 00:04:48,065
+there a parent company?" in discovery
+matters — it can turn a no into a yes.
+
+52
+00:04:48,065 --> 00:04:53,623
+The takeaway: These five categories are
+your pre-flight checklist — cash runway,
+
+53
+00:04:53,623 --> 00:04:58,829
+current ratio, debt structure, revenue
+trajectory, corporate structure. The
+
+54
+00:04:58,829 --> 00:05:04,247
+better you know them, the more confident
+you'll be about the deals you send to
+
+55
+00:05:04,247 --> 00:05:09,242
+underwriting — and the faster those deals
+will move through the process.
+
+56
+00:05:09,242 --> 00:05:13,143
+Next — what happens when these questions
+don't get asked.

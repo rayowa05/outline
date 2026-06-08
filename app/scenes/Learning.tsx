@@ -2,23 +2,20 @@ import { observer } from "mobx-react";
 import {
   AcademicCapIcon,
   ClockIcon,
-  DoneIcon,
-  GraphIcon,
   GoToIcon,
-  LightningIcon,
-  PadlockIcon,
-  ProfileIcon,
-  SparklesIcon,
   TargetIcon,
 } from "outline-icons";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import breakpoint from "styled-components-breakpoint";
-import Button from "~/components/Button";
-import Heading from "~/components/Heading";
 import Scene from "~/components/Scene";
-
-const testModulesPath = "/doc/lms-h5p-test-modules-9uosPH9WQn";
+import {
+  learningCourses,
+  underwritingCourse,
+  type LearningCourse,
+} from "./learningData";
+import LearningHero from "./LearningHero";
+import { underwritingTrainingPath } from "~/utils/routeHelpers";
 
 const brand = {
   paper: "#f7f5ef",
@@ -27,351 +24,177 @@ const brand = {
   ink: "#20302d",
   muted: "#777a73",
   dark: "#1c2018",
-  darkSoft: "#25283a",
   blue: "#354cef",
   lime: "#edff3d",
   lavender: "#ececff",
-  successSurface: "#e9f8f1",
-  successText: "#26724d",
-  warningSurface: "#fff7e6",
-  warningText: "#8a5a00",
+  purple: "#6f3df4",
+  mint: "#e9f8f1",
+  coral: "#ffe8db",
+  sky: "#e7f3ff",
   mono: '"SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace',
 };
 
-type ModuleState =
-  | "notStarted"
-  | "inProgress"
-  | "completed"
-  | "comingSoon"
-  | "designing";
-
-type StatusTone = "accent" | "active" | "neutral" | "muted" | "warning";
-
-const moduleStates: Record<
-  ModuleState,
-  {
-    label: string;
-    action: string;
-    tone: StatusTone;
-    disabled?: boolean;
-  }
-> = {
-  notStarted: {
-    label: "Not started",
-    action: "Start module",
-    tone: "neutral",
-  },
-  inProgress: {
-    label: "In progress",
-    action: "Continue",
-    tone: "active",
-  },
-  completed: {
-    label: "Completed",
-    action: "Review",
-    tone: "accent",
-  },
-  comingSoon: {
-    label: "Coming soon",
-    action: "Coming soon",
-    tone: "muted",
-    disabled: true,
-  },
-  designing: {
-    label: "Designing",
-    action: "Preview",
-    tone: "warning",
-  },
-};
-
-const modules = [
-  {
-    title: "Dash.fi Product Knowledge",
-    type: "Quiz",
-    length: "8 min",
-    state: "completed" as const,
-    progress: 100,
-    score: "80% pass",
-    description:
-      "Baseline certification on cashback, limits, repayment, and product positioning.",
-    path: testModulesPath,
-  },
-  {
-    title: "Competitor Deep Dive: SoFi",
-    type: "Interactive video",
-    length: "12 min",
-    state: "inProgress" as const,
-    progress: 45,
-    score: "4 checkpoints",
-    description:
-      "Practice discovery-first positioning against SoFi with checkpoint questions.",
-    path: testModulesPath,
-  },
-  {
-    title: "Discovery & Objection Lab",
-    type: "Practice",
-    length: "20 min",
-    state: "notStarted" as const,
-    progress: 0,
-    score: "Scenario based",
-    description:
-      "Role-play branching paths for common first-call objections and next steps.",
-    path: testModulesPath,
-  },
-  {
-    title: "First Call Certification",
-    type: "Certification",
-    length: "30 min",
-    state: "designing" as const,
-    progress: 0,
-    score: "Manager reviewed",
-    description:
-      "A scored practice path for discovery, positioning, objection handling, and follow-up discipline.",
-    path: testModulesPath,
-  },
-  {
-    title: "Manager Coaching Review",
-    type: "Coaching",
-    length: "15 min",
-    state: "comingSoon" as const,
-    progress: 0,
-    score: "Team review",
-    description:
-      "A manager-led review module for reinforcing certifications in coaching conversations.",
-    path: testModulesPath,
-  },
-];
-
-const tracks = [
-  {
-    title: "AE Ramp",
-    meta: "First 30 days",
-    description:
-      "The required path for understanding Dash.fi products, positioning, and first-call execution.",
-  },
-  {
-    title: "Product Certification",
-    meta: "Core knowledge",
-    description:
-      "Short assessments that prove reps can explain the product accurately and confidently.",
-  },
-  {
-    title: "Competitive Positioning",
-    meta: "Battlecards + practice",
-    description:
-      "Interactive competitor modules that teach reps when to compare, when to reframe, and when to disqualify.",
-  },
-  {
-    title: "Manager Coaching",
-    meta: "Reinforcement",
-    description:
-      "Coaching guides, score reviews, and follow-up exercises tied to module performance.",
-  },
-];
-
-const futureFeatures = [
-  {
-    title: "My Progress",
-    icon: <ProfileIcon size={18} />,
-    description:
-      "A learner profile for completed modules, active modules, and assigned modules that have not been started.",
-  },
-  {
-    title: "Leaderboard",
-    icon: <GraphIcon size={18} />,
-    description:
-      "Badges, completion speed, score rankings, and team-level training momentum once the scoring model is validated.",
-  },
-];
-
 function Learning() {
+  const plannedCourses = learningCourses.filter(
+    (course) => course.id !== underwritingCourse.id
+  );
+
   return (
-    <Scene icon={<AcademicCapIcon />} title="Learning" wide>
+    <Scene
+      icon={<AcademicCapIcon />}
+      title="DashFi Learning Hub"
+      transparentHeaderUntilScrolled
+      wide
+    >
       <Page>
-        <Hero>
-          <HeroCopy>
-            <Eyebrow>Learning hub pilot</Eyebrow>
-            <Heading>Learning</Heading>
-            <HeroText>
-              A focused training cockpit for Dash.fi modules, certifications,
-              and interactive H5P practice. This is a dedicated app surface, not
-              a collection folder.
-            </HeroText>
-            <Actions>
-              <Button as={Link} to={testModulesPath} icon={<GoToIcon />}>
-                Continue learning
-              </Button>
-              <SecondaryAction href="#modules">Browse modules</SecondaryAction>
-            </Actions>
-          </HeroCopy>
-          <StatusPanel aria-label="Learning progress">
-            <PanelHeader>
-              <PanelTitle>First rollout</PanelTitle>
-              <StatusPill>Pilot</StatusPill>
-            </PanelHeader>
-            <MetricGrid>
-              <Metric>
-                <MetricValue>2</MetricValue>
-                <MetricLabel>Live modules</MetricLabel>
-              </Metric>
-              <Metric>
-                <MetricValue>6</MetricValue>
-                <MetricLabel>Planned tracks</MetricLabel>
-              </Metric>
-              <Metric>
-                <MetricValue>H5P</MetricValue>
-                <MetricLabel>Interactive proof</MetricLabel>
-              </Metric>
-            </MetricGrid>
-          </StatusPanel>
-        </Hero>
+        <LearningHero
+          current="learning-hub"
+          eyebrow="DashFi Enablement"
+          title="DashFi Learning Hub"
+        >
+          One place to certify AE judgment, track progress, and see which reps
+          are ready to position Dash.fi underwriting with customers.
+        </LearningHero>
 
-        <Section>
+        <ReadinessStrip aria-label="Learning priorities">
+          <ReadinessCard>
+            <ReadinessValue>100%</ReadinessValue>
+            <ReadinessLabel>Required to certify</ReadinessLabel>
+          </ReadinessCard>
+          <ReadinessCard>
+            <ReadinessValue>2</ReadinessValue>
+            <ReadinessLabel>Module knowledge checks</ReadinessLabel>
+          </ReadinessCard>
+          <ReadinessCard>
+            <ReadinessValue>Gong</ReadinessValue>
+            <ReadinessLabel>Field examples embedded</ReadinessLabel>
+          </ReadinessCard>
+          <ReadinessCard>
+            <ReadinessValue>Live</ReadinessValue>
+            <ReadinessLabel>Manager reporting</ReadinessLabel>
+          </ReadinessCard>
+        </ReadinessStrip>
+
+        <FeaturedSection aria-labelledby="featured-course-title">
+          <FeaturedCourse to={underwritingTrainingPath()}>
+            <FeaturedCopy>
+              <FeaturedKicker>Active certification</FeaturedKicker>
+              <FeaturedTitle id="featured-course-title">
+                {underwritingCourse.title}
+              </FeaturedTitle>
+              <FeaturedDescription>
+                {underwritingCourse.description}
+              </FeaturedDescription>
+              <CourseMeta aria-label="Course details">
+                <StatusPill>Required</StatusPill>
+                <MetaItem>
+                  <TargetIcon size={14} />
+                  {underwritingCourse.moduleCount} stages
+                </MetaItem>
+                <MetaItem>
+                  <ClockIcon size={14} />
+                  {underwritingCourse.duration}
+                </MetaItem>
+              </CourseMeta>
+              <PrimaryAction>
+                Open certification map <GoToIcon size={15} />
+              </PrimaryAction>
+            </FeaturedCopy>
+            <CourseCover aria-hidden="true">
+              <CoverTopline>Performance underwriting</CoverTopline>
+              <CoverModules>
+                {underwritingCourse.modules.map((module) => (
+                  <CoverModule key={module.title}>
+                    <span>Module {module.number}</span>
+                    <strong>{module.title}</strong>
+                  </CoverModule>
+                ))}
+              </CoverModules>
+            </CourseCover>
+          </FeaturedCourse>
+        </FeaturedSection>
+
+        <CatalogSection id="courses" aria-labelledby="course-catalog-title">
           <SectionHeader>
-            <SectionKicker>
-              <SectionNumber>01</SectionNumber>
-              <span>Assigned modules</span>
-            </SectionKicker>
-            <SectionTitle>Start here</SectionTitle>
-            <SectionText>
-              The first modules prove the full learning path: quiz, interactive
-              video, checkpoint scoring, and a clear next action.
-            </SectionText>
+            <SectionKicker>Future learning paths</SectionKicker>
+            <SectionTitle id="course-catalog-title">
+              Upcoming certifications and playbooks
+            </SectionTitle>
           </SectionHeader>
-          <ModuleGrid id="modules">
-            {modules.map((module) => (
-              <ModuleCard key={module.title}>
-                {(() => {
-                  const state = moduleStates[module.state];
 
-                  return (
-                    <>
-                      <CardTopline>
-                        <Chip>{module.type}</Chip>
-                        <CardMeta>
-                          <ClockIcon size={14} /> {module.length}
-                        </CardMeta>
-                      </CardTopline>
-                      <CardTitle>{module.title}</CardTitle>
-                      <CardDescription>{module.description}</CardDescription>
-                      <CardFooter>
-                        <Outcome>
-                          <TargetIcon size={14} /> {module.score}
-                        </Outcome>
-                        <StatusPill $tone={state.tone}>
-                          {state.label}
-                        </StatusPill>
-                      </CardFooter>
-                      <ProgressWrap>
-                        <ProgressMeta>
-                          <span>Progress</span>
-                          <span>{module.progress}%</span>
-                        </ProgressMeta>
-                        <ProgressTrack
-                          aria-label={`${module.title} progress`}
-                          aria-valuemax={100}
-                          aria-valuemin={0}
-                          aria-valuenow={module.progress}
-                          role="progressbar"
-                        >
-                          <ProgressFill
-                            $tone={state.tone}
-                            $value={module.progress}
-                          />
-                        </ProgressTrack>
-                      </ProgressWrap>
-                      {state.disabled ? (
-                        <CardAction as="span" $disabled>
-                          <PadlockIcon size={14} /> {state.action}
-                        </CardAction>
-                      ) : (
-                        <CardAction as={Link} to={module.path}>
-                          <SparklesIcon size={14} /> {state.action}
-                        </CardAction>
-                      )}
-                    </>
-                  );
-                })()}
-              </ModuleCard>
+          <CatalogGrid>
+            {plannedCourses.map((course, index) => (
+              <PlannedCatalogCard
+                key={course.id}
+                course={course}
+                index={index}
+              />
             ))}
-          </ModuleGrid>
-        </Section>
-
-        <Section>
-          <SectionHeader>
-            <SectionKicker>
-              <SectionNumber>02</SectionNumber>
-              <span>Role tracks</span>
-            </SectionKicker>
-            <SectionTitle>Role tracks</SectionTitle>
-            <SectionText>
-              Tracks keep the learner experience organized by job-to-be-done,
-              while the underlying docs and H5P packages stay governed.
-            </SectionText>
-          </SectionHeader>
-          <TrackGrid>
-            {tracks.map((track) => (
-              <TrackCard key={track.title}>
-                <TrackIcon>
-                  <LightningIcon size={18} />
-                </TrackIcon>
-                <TrackCopy>
-                  <TrackTitle>{track.title}</TrackTitle>
-                  <TrackMeta>{track.meta}</TrackMeta>
-                  <TrackDescription>{track.description}</TrackDescription>
-                </TrackCopy>
-              </TrackCard>
-            ))}
-          </TrackGrid>
-        </Section>
-
-        <Section>
-          <SectionHeader>
-            <SectionKicker>
-              <SectionNumber>03</SectionNumber>
-              <span>Future surfaces</span>
-            </SectionKicker>
-            <SectionTitle>Coming soon</SectionTitle>
-            <SectionText>
-              These surfaces need a dedicated PRD and data model review before
-              they become active learner workflows.
-            </SectionText>
-          </SectionHeader>
-          <FutureGrid>
-            {futureFeatures.map((feature) => (
-              <FutureCard key={feature.title}>
-                <FutureIcon>{feature.icon}</FutureIcon>
-                <FutureCopy>
-                  <FutureTitle>
-                    {feature.title}
-                    <FutureBadge>Coming soon</FutureBadge>
-                  </FutureTitle>
-                  <FutureDescription>{feature.description}</FutureDescription>
-                </FutureCopy>
-              </FutureCard>
-            ))}
-          </FutureGrid>
-        </Section>
-
-        <Roadmap>
-          <RoadmapItem>
-            <DoneIcon size={16} />
-            <span>H5P rendering proof live in Outline</span>
-          </RoadmapItem>
-          <RoadmapItem>
-            <DoneIcon size={16} />
-            <span>Learning tab wired into the app shell</span>
-          </RoadmapItem>
-          <RoadmapItem $pending>
-            <span>3</span>
-            <span>
-              Connect module cards to live tracking and completion data
-            </span>
-          </RoadmapItem>
-        </Roadmap>
+          </CatalogGrid>
+        </CatalogSection>
       </Page>
     </Scene>
   );
+}
+
+function PlannedCatalogCard({
+  course,
+  index,
+}: {
+  course: LearningCourse;
+  index: number;
+}) {
+  return (
+    <CourseCard $accent={plannedAccent(index)}>
+      <CardTopline>
+        <StatusPill $muted>
+          <ClockIcon size={12} />
+          Planned
+        </StatusPill>
+      </CardTopline>
+      <CardTitle>{course.title}</CardTitle>
+      <CardDescription>{course.description}</CardDescription>
+      <CardMeta>
+        <MetaItem>{course.audience}</MetaItem>
+      </CardMeta>
+    </CourseCard>
+  );
+}
+
+function plannedAccent(index: number) {
+  return ["shipping", "app", "expense"][index % 3];
+}
+
+function cardRule(accent: string) {
+  if (accent === "shipping") {
+    return brand.blue;
+  }
+
+  if (accent === "app") {
+    return "#19a767";
+  }
+
+  if (accent === "expense") {
+    return brand.purple;
+  }
+
+  return brand.blue;
+}
+
+function cardTint(accent: string) {
+  if (accent === "shipping") {
+    return "rgba(53, 76, 239, 0.08)";
+  }
+
+  if (accent === "app") {
+    return "rgba(25, 167, 103, 0.08)";
+  }
+
+  if (accent === "expense") {
+    return "rgba(111, 61, 244, 0.08)";
+  }
+
+  return "rgba(53, 76, 239, 0.08)";
 }
 
 const Page = styled.div`
@@ -379,564 +202,343 @@ const Page = styled.div`
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 18px;
   margin: 0;
   min-width: 0;
-  padding: 24px 16px 64px;
+  padding: 14px 16px 48px;
 
   ${breakpoint("tablet")`
-    margin: -16px -32px 0;
-    padding: 32px 32px 72px;
+    gap: 22px;
+    margin: -40px -28px 0;
+    padding: 18px 28px 64px;
   `};
 `;
 
-const Hero = styled.section`
-  background: ${brand.dark};
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  color: #fff;
+const FeaturedSection = styled.section`
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 24px;
-  padding: 28px;
+  gap: 14px;
+`;
+
+const ReadinessStrip = styled.section`
+  display: grid;
+  gap: 10px;
 
   ${breakpoint("tablet")`
-    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
-    align-items: end;
-    padding: 40px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   `};
 `;
 
-const HeroCopy = styled.div`
-  max-width: 720px;
-
-  h1 {
-    color: #fff;
-    font-family: ${brand.mono};
-    font-size: clamp(36px, 5vw, 64px);
-    font-weight: 400;
-    letter-spacing: 0;
-    line-height: 1.02;
-  }
+const ReadinessCard = styled.article`
+  background: linear-gradient(
+    180deg,
+    rgba(53, 76, 239, 0.07),
+    ${brand.surface} 44%
+  );
+  border: 1px solid ${brand.rule};
+  border-top: 4px solid ${brand.blue};
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  min-height: 86px;
+  padding: 14px;
+  box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
 `;
 
-const Eyebrow = styled.div`
-  color: ${brand.lime};
+const ReadinessValue = styled.div`
+  color: ${brand.blue};
   font-family: ${brand.mono};
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  margin-bottom: -12px;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+`;
+
+const ReadinessLabel = styled.div`
+  color: ${brand.muted};
+  font-family: ${brand.mono};
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
   text-transform: uppercase;
 `;
 
-const HeroText = styled.p`
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 17px;
-  line-height: 1.55;
-  margin: -4px 0 0;
-  max-width: 640px;
+const FeaturedCourse = styled(Link)`
+  background: linear-gradient(
+    180deg,
+    rgba(53, 76, 239, 0.06),
+    ${brand.surface} 34%
+  );
+  border: 1px solid ${brand.rule};
+  border-top: 4px solid ${brand.blue};
+  border-radius: 8px;
+  color: ${brand.ink};
+  display: grid;
+  gap: 18px;
+  min-height: 340px;
+  overflow: hidden;
+  padding: 18px;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
+
+  &:hover {
+    border-color: rgba(53, 76, 239, 0.34);
+    color: ${brand.ink};
+    text-decoration: none;
+  }
+
+  ${breakpoint("tablet")`
+    grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+    padding: 22px;
+  `};
 `;
 
-const Actions = styled.div`
+const FeaturedCopy = styled.div`
+  align-content: center;
+  display: grid;
+  min-width: 0;
+  padding: 4px;
+`;
+
+const FeaturedKicker = styled.div`
+  color: ${brand.blue};
+  font-family: ${brand.mono};
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+`;
+
+const FeaturedTitle = styled.h2`
+  color: ${brand.ink};
+  font-family: ${brand.mono};
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin: 0;
+
+  ${breakpoint("tablet")`
+    font-size: 42px;
+  `};
+`;
+
+const FeaturedDescription = styled.p`
+  color: ${brand.muted};
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 14px 0 0;
+  max-width: 620px;
+`;
+
+const CourseMeta = styled.div`
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 18px;
 `;
 
-const SecondaryAction = styled.a`
+const MetaItem = styled.span`
   align-items: center;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.78);
-  display: inline-flex;
-  font-size: 14px;
-  font-weight: 600;
-  height: 34px;
-  justify-content: center;
-  padding: 0 12px;
-  text-decoration: none;
-
-  &:hover {
-    color: #fff;
-    text-decoration: none;
-  }
-`;
-
-const StatusPanel = styled.aside`
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  padding: 18px;
-`;
-
-const PanelHeader = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 18px;
-`;
-
-const PanelTitle = styled.div`
-  color: #fff;
-  font-family: ${brand.mono};
-  font-weight: 600;
-`;
-
-const StatusPill = styled.span<{ $tone?: StatusTone }>`
-  background: ${(props) =>
-    props.$tone === "accent"
-      ? brand.lime
-      : props.$tone === "warning"
-        ? brand.warningSurface
-        : props.$tone === "muted"
-          ? brand.lavender
-          : props.$tone === "active"
-            ? "rgba(53, 76, 239, 0.1)"
-            : brand.surface};
-  border: 1px solid
-    ${(props) =>
-      props.$tone === "accent"
-        ? "transparent"
-        : props.$tone === "warning"
-          ? "#f5c77e"
-          : props.$tone === "active"
-            ? "rgba(53, 76, 239, 0.28)"
-            : brand.rule};
-  border-radius: 999px;
-  color: ${(props) =>
-    props.$tone === "accent"
-      ? brand.dark
-      : props.$tone === "active"
-        ? brand.blue
-        : props.$tone === "warning"
-          ? brand.warningText
-          : props.$tone === "muted"
-            ? brand.blue
-            : brand.muted};
+  color: ${brand.muted};
   display: inline-flex;
   font-family: ${brand.mono};
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 650;
+  gap: 6px;
+  line-height: 1.3;
+`;
+
+const StatusPill = styled.span<{ $muted?: boolean }>`
+  align-items: center;
+  background: ${(props) => (props.$muted ? brand.lavender : brand.lime)};
+  border: 1px solid
+    ${(props) => (props.$muted ? "rgba(53, 76, 239, 0.16)" : "transparent")};
+  border-radius: 999px;
+  color: ${(props) => (props.$muted ? brand.blue : brand.dark)};
+  display: inline-flex;
+  font-family: ${brand.mono};
+  font-size: 12px;
+  font-weight: 700;
+  gap: 6px;
   line-height: 1;
-  padding: 6px 9px;
+  padding: 7px 10px;
   text-transform: uppercase;
   white-space: nowrap;
 `;
 
-const MetricGrid = styled.div`
-  display: grid;
-  gap: 10px;
-`;
-
-const Metric = styled.div`
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
-  padding-top: 12px;
-`;
-
-const MetricValue = styled.div`
+const PrimaryAction = styled.span`
+  align-items: center;
+  background: ${brand.blue};
+  border-radius: 6px;
   color: #fff;
-  font-family: ${brand.mono};
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 1;
-`;
-
-const MetricLabel = styled.div`
-  color: rgba(255, 255, 255, 0.55);
+  display: inline-flex;
   font-family: ${brand.mono};
   font-size: 13px;
-  letter-spacing: 0.08em;
-  margin-top: 4px;
+  font-weight: 700;
+  gap: 8px;
+  height: 38px;
+  justify-content: center;
+  justify-self: start;
+  margin-top: 24px;
+  padding: 0 14px;
   text-transform: uppercase;
 `;
 
-const Section = styled.section`
-  display: flex;
-  flex-direction: column;
+const CourseCover = styled.div`
+  background:
+    linear-gradient(135deg, rgba(53, 76, 239, 0.92), rgba(111, 61, 244, 0.72)),
+    linear-gradient(180deg, transparent, rgba(17, 19, 31, 0.42)), ${brand.blue};
+  border-radius: 8px;
+  color: #fff;
+  display: grid;
+  gap: 18px;
+  min-height: 260px;
+  overflow: hidden;
+  padding: 18px;
+  position: relative;
+
+  &::before {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 38px 38px;
+    content: "";
+    inset: 0;
+    opacity: 0.34;
+    position: absolute;
+  }
+`;
+
+const CoverTopline = styled.div`
+  color: ${brand.lime};
+  font-family: ${brand.mono};
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  position: relative;
+  text-transform: uppercase;
+  z-index: 1;
+`;
+
+const CoverModules = styled.div`
+  align-self: end;
+  display: grid;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+`;
+
+const CoverModule = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 13px;
+
+  span {
+    color: rgba(255, 255, 255, 0.64);
+    font-family: ${brand.mono};
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+`;
+
+const CatalogSection = styled.section`
+  display: grid;
   gap: 16px;
 `;
 
 const SectionHeader = styled.div`
-  max-width: 720px;
+  display: grid;
+  gap: 6px;
 `;
 
 const SectionKicker = styled.div`
-  align-items: center;
-  color: ${brand.muted};
-  display: flex;
+  color: ${brand.blue};
   font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 700;
-  gap: 12px;
-  letter-spacing: 0.18em;
-  margin-bottom: 14px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-
-  &::after {
-    background: ${brand.rule};
-    content: "";
-    flex: 1 1 auto;
-    height: 1px;
-  }
-`;
-
-const SectionNumber = styled.span`
-  background: ${brand.lavender};
-  border-radius: 4px;
-  color: ${brand.blue};
-  display: inline-flex;
-  letter-spacing: 0.08em;
-  padding: 5px 9px;
 `;
 
 const SectionTitle = styled.h2`
-  color: ${brand.blue};
+  color: ${brand.ink};
   font-family: ${brand.mono};
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 400;
-  line-height: 1.2;
-  margin: 0 0 6px;
-`;
-
-const SectionText = styled.p`
-  color: ${brand.muted};
-  font-size: 14px;
-  line-height: 1.5;
+  letter-spacing: 0;
+  line-height: 1.18;
   margin: 0;
 `;
 
-const ModuleGrid = styled.div`
+const CatalogGrid = styled.div`
   display: grid;
   gap: 14px;
 
   ${breakpoint("tablet")`
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   `};
 `;
 
-const ModuleCard = styled.article`
-  background: ${brand.surface};
+const CourseCardBase = styled.article<{ $accent: string }>`
+  background: ${(props) =>
+    `linear-gradient(180deg, ${cardTint(props.$accent)}, ${brand.surface} 44%)`};
   border: 1px solid ${brand.rule};
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  min-height: 294px;
-  padding: 18px;
+  border-top: 4px solid ${(props) => cardRule(props.$accent)};
+  border-radius: 8px;
+  color: ${brand.ink};
+  display: grid;
+  gap: 12px;
+  min-height: 238px;
+  padding: 16px;
+  box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
 `;
 
 const CardTopline = styled.div`
   align-items: center;
   display: flex;
-  justify-content: space-between;
   gap: 10px;
-  margin-bottom: 16px;
-`;
-
-const Chip = styled.span`
-  background: rgba(53, 76, 239, 0.06);
-  border: 1px solid rgba(53, 76, 239, 0.14);
-  border-radius: 4px;
-  color: ${brand.ink};
-  font-family: ${brand.mono};
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  padding: 5px 8px;
-  text-transform: uppercase;
-`;
-
-const CardMeta = styled.span`
-  align-items: center;
-  color: ${brand.muted};
-  display: inline-flex;
-  font-family: ${brand.mono};
-  font-size: 12px;
-  gap: 4px;
-  white-space: nowrap;
+  justify-content: space-between;
 `;
 
 const CardTitle = styled.h3`
-  color: ${brand.ink};
+  color: inherit;
   font-family: ${brand.mono};
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 1.3;
-  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.12;
+  margin: 0;
 `;
 
 const CardDescription = styled.p`
   color: ${brand.muted};
-  font-size: 14px;
-  line-height: 1.45;
-  margin: 0;
-`;
-
-const CardFooter = styled.div`
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 18px;
-`;
-
-const Outcome = styled.span`
-  align-items: center;
-  color: ${brand.muted};
-  display: inline-flex;
-  font-family: ${brand.mono};
-  font-size: 12px;
-  font-weight: 600;
-  gap: 5px;
-  letter-spacing: 0.04em;
-`;
-
-const ProgressWrap = styled.div`
-  display: grid;
-  gap: 7px;
-  margin-top: 14px;
-`;
-
-const ProgressMeta = styled.div`
-  align-items: center;
-  color: ${brand.muted};
-  display: flex;
-  font-family: ${brand.mono};
-  font-size: 12px;
-  font-weight: 600;
-  justify-content: space-between;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-`;
-
-const ProgressTrack = styled.div`
-  background: #ece9e1;
-  border: 1px solid ${brand.rule};
-  border-radius: 999px;
-  height: 8px;
-  overflow: hidden;
-`;
-
-const ProgressFill = styled.div<{ $tone: StatusTone; $value: number }>`
-  background: ${(props) =>
-    props.$tone === "accent"
-      ? brand.lime
-      : props.$tone === "warning"
-        ? "#d89b24"
-        : props.$tone === "muted"
-          ? brand.rule
-          : brand.blue};
-  border-radius: inherit;
-  height: 100%;
-  transition: width 160ms ease;
-  width: ${(props) => props.$value}%;
-`;
-
-const CardAction = styled.a<{ $disabled?: boolean }>`
-  align-items: center;
-  background: ${(props) => (props.$disabled ? "#ece9e1" : brand.dark)};
-  border: 1px solid ${(props) => (props.$disabled ? brand.rule : "transparent")};
-  border-radius: 6px;
-  color: ${(props) => (props.$disabled ? brand.muted : "#fff")};
-  display: flex;
-  font-family: ${brand.mono};
-  font-size: 14px;
-  font-weight: 600;
-  gap: 6px;
-  height: 34px;
-  justify-content: center;
-  margin-top: 16px;
-  pointer-events: ${(props) => (props.$disabled ? "none" : "auto")};
-  text-decoration: none;
-
-  &:hover {
-    color: ${(props) => (props.$disabled ? brand.muted : brand.lime)};
-    opacity: ${(props) => (props.$disabled ? 1 : 0.9)};
-    text-decoration: none;
-  }
-`;
-
-const TrackGrid = styled.div`
-  display: grid;
-  gap: 12px;
-
-  ${breakpoint("tablet")`
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  `};
-`;
-
-const TrackCard = styled.article`
-  align-items: flex-start;
-  background: ${brand.surface};
-  border: 1px solid ${brand.rule};
-  border-radius: 12px;
-  display: flex;
-  gap: 14px;
-  padding: 16px;
-`;
-
-const TrackIcon = styled.div`
-  align-items: center;
-  background: ${brand.lavender};
-  border: 1px solid rgba(53, 76, 239, 0.12);
-  border-radius: 8px;
-  color: ${brand.blue};
-  display: flex;
-  flex: 0 0 36px;
-  height: 36px;
-  justify-content: center;
-  width: 36px;
-`;
-
-const TrackCopy = styled.div`
-  min-width: 0;
-`;
-
-const TrackTitle = styled.h3`
-  align-items: center;
-  color: ${brand.ink};
-  display: flex;
-  flex-wrap: wrap;
-  font-family: ${brand.mono};
-  font-size: 15px;
-  font-weight: 600;
-  gap: 6px;
-  margin: 0;
-
-  &::after {
-    background: ${brand.lavender};
-    border-radius: 999px;
-    color: ${brand.blue};
-    content: "(Coming soon)";
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 4px 7px;
-  }
-`;
-
-const TrackMeta = styled.div`
-  color: ${brand.blue};
-  font-family: ${brand.mono};
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.08em;
-  margin-top: 2px;
-  text-transform: uppercase;
-`;
-
-const TrackDescription = styled.p`
-  color: ${brand.muted};
   font-size: 13px;
   line-height: 1.45;
-  margin: 8px 0 0;
-`;
-
-const FutureGrid = styled.div`
-  display: grid;
-  gap: 12px;
-
-  ${breakpoint("tablet")`
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  `};
-`;
-
-const FutureCard = styled.article`
-  align-items: flex-start;
-  background: ${brand.dark};
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  display: flex;
-  gap: 14px;
-  padding: 16px;
-`;
-
-const FutureIcon = styled.div`
-  align-items: center;
-  background: rgba(237, 255, 61, 0.1);
-  border: 1px solid rgba(237, 255, 61, 0.22);
-  border-radius: 8px;
-  color: ${brand.lime};
-  display: flex;
-  flex: 0 0 36px;
-  height: 36px;
-  justify-content: center;
-  width: 36px;
-`;
-
-const FutureCopy = styled.div`
-  min-width: 0;
-`;
-
-const FutureTitle = styled.h3`
-  align-items: center;
-  color: #fff;
-  display: flex;
-  flex-wrap: wrap;
-  font-family: ${brand.mono};
-  font-size: 15px;
-  font-weight: 650;
-  gap: 8px;
   margin: 0;
 `;
 
-const FutureBadge = styled.span`
-  background: ${brand.lime};
-  border-radius: 999px;
-  color: ${brand.dark};
-  font-family: ${brand.mono};
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  padding: 4px 7px;
-  text-transform: uppercase;
-`;
-
-const FutureDescription = styled.p`
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 13px;
-  line-height: 1.45;
-  margin: 8px 0 0;
-`;
-
-const Roadmap = styled.div`
-  border-top: 1px solid ${brand.rule};
-  display: grid;
+const CardMeta = styled.div`
+  align-items: end;
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  padding-top: 18px;
 `;
 
-const RoadmapItem = styled.div<{ $pending?: boolean }>`
-  align-items: center;
-  color: ${(props) => (props.$pending ? brand.muted : brand.ink)};
-  display: flex;
-  font-family: ${brand.mono};
-  font-size: 13px;
-  gap: 8px;
-
-  svg,
-  > span:first-child {
-    align-items: center;
-    background: ${(props) => (props.$pending ? brand.surface : brand.blue)};
-    border: 1px solid
-      ${(props) => (props.$pending ? brand.rule : "transparent")};
-    border-radius: 999px;
-    color: ${(props) => (props.$pending ? brand.muted : "#fff")};
-    display: inline-flex;
-    flex: 0 0 22px;
-    font-size: 12px;
-    font-weight: 700;
-    height: 22px;
-    justify-content: center;
-    width: 22px;
-  }
-`;
+const CourseCard = styled(CourseCardBase)``;
 
 export default observer(Learning);

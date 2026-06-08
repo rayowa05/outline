@@ -17,7 +17,11 @@ import {
   archivePath,
   draftsPath,
   homePath,
+  learningLeaderboardPath,
+  learningMyProgressPath,
   learningPath,
+  learningReportingPath,
+  underwritingTrainingPath,
   searchPath,
   settingsPath,
   matchDocumentSlug as documentSlug,
@@ -34,6 +38,12 @@ const Document = lazy(() => import("~/scenes/Document"));
 const Drafts = lazy(() => import("~/scenes/Drafts"));
 const Home = lazy(() => import("~/scenes/Home"));
 const Learning = lazy(() => import("~/scenes/Learning"));
+const LearningLeaderboard = lazy(() => import("~/scenes/LearningLeaderboard"));
+const LearningReporting = lazy(() => import("~/scenes/LearningReporting"));
+const MyProgress = lazy(() => import("~/scenes/MyProgress"));
+const UnderwritingTraining = lazy(() => import("~/scenes/UnderwritingTraining"));
+const UnderwritingLesson = lazy(() => import("~/scenes/UnderwritingLesson"));
+const UnderwritingQuiz = lazy(() => import("~/scenes/UnderwritingQuiz"));
 const Search = lazy(() => import("~/scenes/Search"));
 const Trash = lazy(() => import("~/scenes/Trash"));
 const Debug = lazy(() => import("~/scenes/Developer/Debug"));
@@ -84,6 +94,48 @@ function AuthenticatedRoutes() {
             <Route path={`${homePath()}/:tab?`} component={Home} />
             {canAccessLearning && (
               <Route exact path={learningPath()} component={Learning} />
+            )}
+            {canAccessLearning && (
+              <Route
+                exact
+                path={learningMyProgressPath()}
+                component={MyProgress}
+              />
+            )}
+            {canAccessLearning && (
+              <Route
+                exact
+                path={learningLeaderboardPath()}
+                component={LearningLeaderboard}
+              />
+            )}
+            {canAccessLearning && (
+              <Route
+                exact
+                path={learningReportingPath()}
+                component={LearningReporting}
+              />
+            )}
+            {canAccessLearning && (
+              <Route
+                exact
+                path={underwritingTrainingPath()}
+                component={UnderwritingTraining}
+              />
+            )}
+            {canAccessLearning && (
+              <Route
+                exact
+                path={`${underwritingTrainingPath()}/module-:moduleNumber(\\d+)/lesson-:lessonNumber(\\d+)`}
+                component={UnderwritingLesson}
+              />
+            )}
+            {canAccessLearning && (
+              <Route
+                exact
+                path={`${underwritingTrainingPath()}/module-:moduleNumber(\\d+)/quiz`}
+                component={UnderwritingQuiz}
+              />
             )}
             <Redirect from="/dashboard" to={homePath()} />
             <Redirect exact from="/starred" to={homePath()} />

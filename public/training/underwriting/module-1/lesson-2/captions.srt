@@ -1,0 +1,377 @@
+1
+00:00:00,000 --> 00:00:02,090
+The Financial Language You Need.
+
+2
+00:00:02,090 --> 00:00:07,899
+Here's a number: negative eleven million
+dollars. That's the net asset position of
+
+3
+00:00:07,899 --> 00:00:13,206
+a real company that came through our
+pipeline. They had revenue — over four
+
+4
+00:00:13,206 --> 00:00:18,585
+million a year. They had customers.
+They'd been in business for nearly fifty
+
+5
+00:00:18,585 --> 00:00:23,964
+years. On the surface, the deal looked
+like a fit. But when the underwriting
+
+6
+00:00:23,964 --> 00:00:28,984
+team opened the books, the picture
+changed. This was a hardware and IoT
+
+7
+00:00:28,984 --> 00:00:34,506
+company that owned its full supply chain
+— proprietary R&D, manufacturing, app
+
+8
+00:00:34,506 --> 00:00:39,598
+development. All of that infrastructure
+had accumulated years of capital
+
+9
+00:00:39,598 --> 00:00:45,120
+expenditure that crushed their balance
+sheet. They owed eleven million dollars
+
+10
+00:00:45,120 --> 00:00:47,415
+more than everything they owned.
+
+11
+00:00:47,415 --> 00:00:53,098
+That's the kind of thing that gets caught
+in underwriting. And sometimes, even with
+
+12
+00:00:53,098 --> 00:00:58,296
+great discovery, a company like that can
+still make it through — because the
+
+13
+00:00:58,296 --> 00:01:03,563
+surface-level picture looks fine. But the
+more you understand these financial
+
+14
+00:01:03,563 --> 00:01:08,554
+concepts, the better you'll be at
+spotting the obvious nonfits early, and
+
+15
+00:01:08,554 --> 00:01:13,890
+the more confident you'll feel about the
+deals you do push forward. There will
+
+16
+00:01:13,890 --> 00:01:18,880
+always be edge cases that reach the
+underwriting team, and that's exactly
+
+17
+00:01:18,880 --> 00:01:24,009
+what they're there for. Your job is to
+reduce the noise — not eliminate it.
+
+18
+00:01:24,009 --> 00:01:28,574
+The concepts in this section are
+foundational vocabulary. When you
+
+19
+00:01:28,574 --> 00:01:33,912
+understand these terms, you'll understand
+why the underwriting team makes the
+
+20
+00:01:33,912 --> 00:01:39,601
+decisions they make, and you'll be better
+equipped to have financial conversations
+
+21
+00:01:39,601 --> 00:01:41,006
+with your prospects.
+
+22
+00:01:41,006 --> 00:01:44,628
+Over the next few minutes, we're going to
+cover three sections.
+
+23
+00:01:44,628 --> 00:01:50,935
+First — the balance sheet. What a company
+owns versus what it owes. We'll cover two
+
+24
+00:01:50,935 --> 00:01:54,473
+concepts: net asset position and current
+ratio.
+
+25
+00:01:54,473 --> 00:02:00,436
+Second — cash flow. How fast money is
+moving in and out of the company. We'll
+
+26
+00:02:00,436 --> 00:02:02,554
+cover burn rate and runway.
+
+27
+00:02:02,554 --> 00:02:07,849
+Third — Financial statements. The
+documents that tell the financial story.
+
+28
+00:02:07,849 --> 00:02:12,354
+Section one: Net asset position and
+ratios.
+
+29
+00:02:12,354 --> 00:02:19,836
+Net asset position. Think a homeowner
+whose home is worth $500K. They owe $300K
+
+30
+00:02:19,836 --> 00:02:27,127
+on the mortgage. So their net asset
+position is $200K. Same thing applies for
+
+31
+00:02:27,127 --> 00:02:34,897
+a business. Add up everything they own —
+cash, inventory, equipment, receivables —
+
+32
+00:02:34,897 --> 00:02:42,476
+and subtract everything they owe — loans,
+payables, credit lines. What's left is
+
+33
+00:02:42,476 --> 00:02:50,342
+their net asset position. That company at
+negative $11M? Their debts exceeded their
+
+34
+00:02:50,342 --> 00:02:51,781
+assets by $11M.
+
+35
+00:02:51,781 --> 00:02:58,139
+Current ratio. This is the "can you pay
+your short-term bills" number. Take
+
+36
+00:02:58,139 --> 00:03:05,013
+current assets — which is your cash and
+anything you can turn into cash quickly —
+
+37
+00:03:05,013 --> 00:03:11,801
+and divide by current liabilities, the
+bills due in the next 12 months. So let's
+
+38
+00:03:11,801 --> 00:03:18,159
+say a prospect has $100K in the bank,
+$80K in upcoming bills? You get 1.25.
+
+39
+00:03:18,159 --> 00:03:24,852
+Here's another example. You have $100K in
+the bank and $150K in current
+
+40
+00:03:24,852 --> 00:03:32,214
+liabilities. That's 0.67. This is a not
+so great ration. Our underwriting team
+
+41
+00:03:32,214 --> 00:03:39,193
+has said a weak current ratio is one of
+the quickest ways a prospect won't
+
+42
+00:03:39,193 --> 00:03:40,914
+qualify for float.
+
+43
+00:03:40,914 --> 00:03:44,861
+Section two: cash flow — burn rate and
+runway.
+
+44
+00:03:44,861 --> 00:03:51,921
+Burn rate is money going out minus money
+coming in, every month. A company
+
+45
+00:03:51,921 --> 00:03:59,465
+spending $200K a month and bringing in
+$150K has a $50K monthly burn. That burn
+
+46
+00:03:59,465 --> 00:04:04,784
+has to come from somewhere — usually
+their bank account.
+
+47
+00:04:04,784 --> 00:04:10,612
+Which brings us to runway. How many
+months can the company survive if revenue
+
+48
+00:04:10,612 --> 00:04:16,057
+stopped tomorrow? Take their bank
+balance, divide by their monthly burn.
+
+49
+00:04:16,057 --> 00:04:21,118
+$600K in the bank with a $50K burn?
+That's 12 months of runway. The
+
+50
+00:04:21,118 --> 00:04:27,253
+underwriting team wants to see 12 months
+of cash on hand for extended terms. Less
+
+51
+00:04:27,253 --> 00:04:33,388
+than that, and the float we're extending
+starts to look like a company in need of
+
+52
+00:04:33,388 --> 00:04:36,456
+a lifeline instead of a tool for growth.
+
+53
+00:04:36,456 --> 00:04:42,215
+Section three: financial statements —
+P&L, balance sheet, and gross margin.
+
+54
+00:04:42,215 --> 00:04:48,439
+A P&L — profit and loss statement — Think
+of this like the a movie. It shows
+
+55
+00:04:48,439 --> 00:04:54,663
+revenue minus expenses over a period of
+time. The underwriting team reads 24
+
+56
+00:04:54,663 --> 00:05:01,302
+months of P&Ls to see the trajectory. Is
+the company getting more profitable each
+
+57
+00:05:01,302 --> 00:05:06,364
+quarter? Holding steady? Going under? The
+P&L tells the story.
+
+58
+00:05:06,364 --> 00:05:12,215
+A balance sheet is the photograph. A
+single snapshot — what you own and what
+
+59
+00:05:12,215 --> 00:05:18,222
+you owe on one specific date. The P&L
+shows direction. The balance sheet shows
+
+60
+00:05:18,222 --> 00:05:20,250
+where you stand right now.
+
+61
+00:05:20,250 --> 00:05:25,671
+The underwriting team needs both a
+balance sheet and Profit and loss
+
+62
+00:05:25,671 --> 00:05:31,982
+statements only when a prospect wants a
+card with extended repayment terms (aka
+
+63
+00:05:31,982 --> 00:05:38,132
+Terms like Net 15 or Net 30). These types
+of deals require 3 business days to
+
+64
+00:05:38,132 --> 00:05:44,443
+review and may require your client to
+take a call with the underwriting team to
+
+65
+00:05:44,443 --> 00:05:51,078
+learn more about the business's goals and
+operating modle. More on this in our next
+
+66
+00:05:51,078 --> 00:05:51,644
+module.
+
+67
+00:05:51,644 --> 00:05:58,711
+Gross margin. The percentage of revenue
+left after you subtract the direct cost
+
+68
+00:05:58,711 --> 00:06:05,598
+of what you sell. A DTC skincare brand
+buying product for $10 and selling for
+
+69
+00:06:05,598 --> 00:06:12,665
+$50 has an 80% gross margin. A logistics
+company moving freight at thin spreads
+
+70
+00:06:12,665 --> 00:06:20,005
+might run 10 to 30%. Higher margin means
+more room for error — more room for us to
+
+71
+00:06:20,005 --> 00:06:27,344
+extend credit. A company with 70% margins
+can absorb a bad month. A company at 12%
+
+72
+00:06:27,344 --> 00:06:28,703
+has no cushion.
+
+73
+00:06:28,703 --> 00:06:34,508
+Here's the takeaway for the seller: You
+are not being asked to read a balance
+
+74
+00:06:34,508 --> 00:06:40,159
+sheet like an accountant. But it's
+important to play close attention to the
+
+75
+00:06:40,159 --> 00:06:45,658
+next module so you too can identify great
+candidates for underwriting and
+
+76
+00:06:45,658 --> 00:06:47,186
+ultimately, Dash-fi.
+
+77
+00:06:47,186 --> 00:06:52,372
+Next — how the underwriting team uses
+these concepts to make decisions, and
+
+78
+00:06:52,372 --> 00:06:54,895
+what a good-fit prospect looks like.

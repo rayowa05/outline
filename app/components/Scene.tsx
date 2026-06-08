@@ -19,6 +19,8 @@ type Props = {
   centered?: boolean;
   /** Whether to use the full width of the screen (default: false) */
   wide?: boolean;
+  /** Whether the sticky header should stay transparent until the page is scrolled */
+  transparentHeaderUntilScrolled?: boolean;
   /** The content of the scene */
   children?: React.ReactNode;
 };
@@ -32,6 +34,7 @@ const Scene: React.FC<Props> = ({
   children,
   centered,
   wide,
+  transparentHeaderUntilScrolled,
 }: Props) => (
   <FillWidth>
     <PageTitle title={textTitle ?? (typeof title === "string" ? title : "")} />
@@ -48,6 +51,7 @@ const Scene: React.FC<Props> = ({
       }
       actions={actions}
       left={left}
+      transparentUntilScrolled={transparentHeaderUntilScrolled}
     />
     {centered !== false ? (
       <CenteredContent maxWidth={wide ? "100vw" : undefined} withStickyHeader>

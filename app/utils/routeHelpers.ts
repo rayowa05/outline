@@ -12,6 +12,33 @@ export function learningPath(): string {
   return "/learning";
 }
 
+export function learningMyProgressPath(): string {
+  return `${learningPath()}/my-progress`;
+}
+
+export function learningLeaderboardPath(): string {
+  return `${learningPath()}/leaderboard`;
+}
+
+export function learningReportingPath(): string {
+  return `${learningPath()}/reporting`;
+}
+
+export function underwritingTrainingPath(): string {
+  return `${learningPath()}/underwriting-training`;
+}
+
+export function underwritingLessonPath(
+  moduleNumber: number,
+  lessonNumber: number
+): string {
+  return `${underwritingTrainingPath()}/module-${moduleNumber}/lesson-${lessonNumber}`;
+}
+
+export function underwritingQuizPath(moduleNumber: number): string {
+  return `${underwritingTrainingPath()}/module-${moduleNumber}/quiz`;
+}
+
 export function logoutPath() {
   return {
     pathname: "/",

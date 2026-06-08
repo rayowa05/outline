@@ -23,3 +23,8 @@ data/*
 !.yarn/releases
 .yarn/releases
 !.yarn/sdks
+
+# Underwriting training source audio/timeline files are kept locally for editing.
+# Runtime uses compressed audio, captions, and video assets.
+public/training/**/*.wav
+public/training/**/*.aaf

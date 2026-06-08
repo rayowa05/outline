@@ -1,0 +1,214 @@
+1
+00:00:00,000 --> 00:00:01,393
+Reading the Signals.
+
+2
+00:00:01,393 --> 00:00:06,740
+You've positioned the card. You've asked
+the questions. Maybe you've handled some
+
+3
+00:00:06,740 --> 00:00:12,153
+resistance. Now you need to make a call:
+is this prospect a fit for float, a Net-1
+
+4
+00:00:12,153 --> 00:00:16,765
+close, or something that shouldn't go to
+the underwriting team at all?
+
+5
+00:00:16,765 --> 00:00:18,948
+Here are the signals that tell you.
+
+6
+00:00:18,948 --> 00:00:20,295
+Financial Signals.
+
+7
+00:00:20,295 --> 00:00:26,276
+First — personal credit cards funding the
+ads. If the founder is swiping a personal
+
+8
+00:00:26,276 --> 00:00:31,383
+Amex to run Meta campaigns, the business
+doesn't have its own financial
+
+9
+00:00:31,383 --> 00:00:34,738
+infrastructure yet. Net-1 is the right
+product.
+
+10
+00:00:34,738 --> 00:00:40,952
+Second — burn exceeds revenue with short
+runway. They raised five million dollars.
+
+11
+00:00:40,952 --> 00:00:46,706
+You ask about cash and they say two
+hundred thousand. That means they burned
+
+12
+00:00:46,706 --> 00:00:52,690
+through $4.8 million. A company spending
+more than it makes isn't automatically
+
+13
+00:00:52,690 --> 00:00:58,827
+disqualified — growth-stage brands burn
+cash intentionally. But burn greater than
+
+14
+00:00:58,827 --> 00:01:04,735
+revenue with less than six months of
+runway is a sign that the Net1 may be the
+
+15
+00:01:04,735 --> 00:01:06,039
+only option here.
+
+16
+00:01:06,039 --> 00:01:11,646
+Any one of these signals means float is
+off the table. That's not a dead deal —
+
+17
+00:01:11,646 --> 00:01:16,534
+it's a Net-1 close until the company's
+financial profile strengthens.
+
+18
+00:01:16,534 --> 00:01:18,113
+Industry signals.
+
+19
+00:01:18,113 --> 00:01:23,015
+Revenue isn't the only predictor of
+underwriting outcomes. For the same
+
+20
+00:01:23,015 --> 00:01:28,267
+reason a 10-million-dollar supplement
+brand get's approved for float while a
+
+21
+00:01:28,267 --> 00:01:33,589
+10-hundred-million-dollar auto parts
+retailer gets denied. There are types of
+
+22
+00:01:33,589 --> 00:01:38,701
+business models that may have trouble
+getting approved for extended terms.
+
+23
+00:01:38,701 --> 00:01:40,312
+Here's a four examples:
+
+24
+00:01:40,312 --> 00:01:46,250
+Resellers, distributors, dropshippers.
+They move product they don't own. When
+
+25
+00:01:46,250 --> 00:01:52,032
+inventory belongs to someone else,
+underwriting doesn't have assets to back
+
+26
+00:01:52,032 --> 00:01:58,361
+the float, there's nothing there. When a
+dollar goes out to a supplier and doesn't
+
+27
+00:01:58,361 --> 00:02:04,533
+come back until someone downstream buys
+and pays -- that cycle can stretch 30 to
+
+28
+00:02:04,533 --> 00:02:05,158
+90 days.
+
+29
+00:02:05,158 --> 00:02:11,640
+Manufacturing -- These companies may have
+a cash conversion cycle is often lagging
+
+30
+00:02:11,640 --> 00:02:17,801
+revenue. R&D, tooling, manufacturing
+runs, shipping from overseas -- a company
+
+31
+00:02:17,801 --> 00:02:24,203
+might spend in January on a product that
+doesn't generate revenue until May. They
+
+32
+00:02:24,203 --> 00:02:29,965
+look like DTC brands on the surface, but
+their balance sheet looks like a
+
+33
+00:02:29,965 --> 00:02:31,165
+manufacturer's.
+
+34
+00:02:31,165 --> 00:02:36,769
+Service providers -- agencies, 3PLs,
+staffing companies. The team is on
+
+35
+00:02:36,769 --> 00:02:42,933
+payroll every two weeks but revenue comes
+in on net-30 or net-60 invoices from
+
+36
+00:02:42,933 --> 00:02:48,617
+clients. There's no inventory to
+collateralize and no hard assets on the
+
+37
+00:02:48,617 --> 00:02:52,620
+balance sheet. Cash goes out fast, comes
+back slow.
+
+38
+00:02:52,620 --> 00:02:58,533
+Pre-revenue DTC brands scaling into spend
+-- the brand itself might be a perfect
+
+39
+00:02:58,533 --> 00:03:04,445
+ICP fit, but if they're burning cash to
+scale and haven't hit profitability, the
+
+40
+00:03:04,445 --> 00:03:09,534
+cash conversion cycle is negative.
+They're spending on ads today with
+
+41
+00:03:09,534 --> 00:03:12,079
+revenue that hasn't caught up yet.
+
+42
+00:03:12,079 --> 00:03:16,643
+None of these are automatic
+disqualifications. Net-1 may still be the
+
+43
+00:03:16,643 --> 00:03:21,879
+right offer. But if you're hearing these
+signals on a discovery call, flag them
+
+44
+00:03:21,879 --> 00:03:26,645
+early — and set the right expectations
+before the prospect fills out the
+
+45
+00:03:26,645 --> 00:03:27,450
+application.

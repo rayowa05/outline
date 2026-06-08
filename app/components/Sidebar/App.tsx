@@ -135,7 +135,7 @@ function AppSidebar() {
                     to={learningPath()}
                     icon={<AcademicCapIcon />}
                     exact={false}
-                    label={t("Learning")}
+                    label={t("DashFi Learning Hub")}
                   />
                 )}
                 <SidebarLink

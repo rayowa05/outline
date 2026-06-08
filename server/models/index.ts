@@ -30,6 +30,16 @@ export { default as GroupUser } from "./GroupUser";
 
 export { default as H5PModule } from "./H5PModule";
 
+export { default as LearningAssignment } from "./LearningAssignment";
+
+export { default as LearningBadge } from "./LearningBadge";
+
+export { default as LearningEvent } from "./LearningEvent";
+
+export { default as LearningModuleNote } from "./LearningModuleNote";
+
+export { default as LearningQuizAttempt } from "./LearningQuizAttempt";
+
 export { default as Import } from "./Import";
 
 export { default as ImportTask } from "./ImportTask";

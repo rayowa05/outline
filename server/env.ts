@@ -789,6 +789,20 @@ export class Environment {
   );
 
   /**
+   * Development-only helper for local LMS visual QA. When enabled, localhost
+   * requests without an access token are signed in as LOCALHOST_AUTH_BYPASS_EMAIL.
+   */
+  @IsBoolean()
+  public LOCALHOST_AUTH_BYPASS = this.toBoolean(
+    environment.LOCALHOST_AUTH_BYPASS ?? "false"
+  );
+
+  @IsOptional()
+  @IsMailboxAddress()
+  public LOCALHOST_AUTH_BYPASS_EMAIL =
+    environment.LOCALHOST_AUTH_BYPASS_EMAIL ?? "ray@dash.fi";
+
+  /**
    * Time window in seconds to analyze webhook failures for disabling decision.
    * Defaults to 86400 seconds (24 hours).
    */

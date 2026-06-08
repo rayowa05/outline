@@ -1,0 +1,274 @@
+1
+00:00:00,000 --> 00:00:02,090
+Handling Customer Concerns.
+
+2
+00:00:02,090 --> 00:00:07,692
+You've framed the application to get
+ahead of common concerns. But sometimes a
+
+3
+00:00:07,692 --> 00:00:13,003
+prospect still pushes back. Here's how
+the best AEs on our team handle it.
+
+4
+00:00:13,003 --> 00:00:17,275
+Tactic one: validate, align, answer.
+
+5
+00:00:17,275 --> 00:00:23,025
+When a prospect raises a concern, Andy
+Murphy follows a three-step pattern.
+
+6
+00:00:23,025 --> 00:00:28,931
+Listen to how he handles a question from
+Guy Lelouch at GovPlus — a $2M deal:
+
+7
+00:00:28,931 --> 00:00:38,872
+Guy asks: "Is
+it like a massive contract with personal
+
+8
+00:00:38,872 --> 00:00:42,677
+guarantee and all that stuff?".
+
+9
+00:00:42,677 --> 00:00:49,077
+Andy doesn't just say "no." He validates:
+"That's obviously a concern for a lot of
+
+10
+00:00:49,077 --> 00:00:55,081
+founders." He aligns: "Our founders are
+very aligned on that — the pain point
+
+11
+00:00:55,081 --> 00:01:01,244
+we're looking to solve is really around
+digital advertising." Then he gives the
+
+12
+00:01:01,244 --> 00:01:07,248
+structural answer: "There's no personal
+guarantee. We don't do fees. We don't
+
+13
+00:01:07,248 --> 00:01:13,095
+charge interest. It's a corporate card
+issued against your LLC or C corp.".
+
+14
+00:01:13,095 --> 00:01:19,175
+Three steps. Validate the concern, align
+on values, then answer. The prospect
+
+15
+00:01:19,175 --> 00:01:22,615
+feels heard before they get the
+information.
+
+16
+00:01:22,615 --> 00:01:27,073
+Tactic two: direct answer, then pivot to
+simplicity.
+
+17
+00:01:27,073 --> 00:01:32,469
+Sometimes the best response is the
+shortest one — a direct "no" followed by
+
+18
+00:01:32,469 --> 00:01:34,875
+how easy the process actually is.
+
+19
+00:01:34,875 --> 00:01:40,217
+Kurt Bell when a prospect asks about
+credit checks:
+
+20
+00:01:40,217 --> 00:01:46,871
+"No personal
+guarantee, no credit check, which is a
+
+21
+00:01:46,871 --> 00:01:53,151
+thing founders appreciate as well.
+Application is super lightweight,
+
+22
+00:01:53,151 --> 00:02:00,461
+probably takes you 10, 15 minutes, just
+KYC verification for beneficial owners,
+
+23
+00:02:00,461 --> 00:02:05,897
+controlling officer, connected bank
+account. Very simple.".
+
+24
+00:02:05,897 --> 00:02:11,891
+Tim Jonas handles the same question:
+"We
+
+25
+00:02:11,891 --> 00:02:18,869
+underwrite completely on the business. No
+personal guarantee or personal credit
+
+26
+00:02:18,869 --> 00:02:26,116
+check for you. For net one, all I need is
+you to fill out the application, connect
+
+27
+00:02:26,116 --> 00:02:32,200
+your business bank account, send me your
+EIN document and articles of
+
+28
+00:02:32,200 --> 00:02:36,315
+organization. That's all we need for net
+one.".
+
+29
+00:02:36,315 --> 00:02:42,092
+Both lead with the direct answer, then
+pivot to how simple the next step is. The
+
+30
+00:02:42,092 --> 00:02:46,114
+concern is addressed and replaced with
+forward momentum.
+
+31
+00:02:46,114 --> 00:02:50,015
+Tactic three: redirect when you hit a
+wall.
+
+32
+00:02:50,015 --> 00:02:54,506
+Sometimes a prospect refuses — not
+because of a specific concern, but
+
+33
+00:02:54,506 --> 00:02:59,591
+because they're not the right person to
+share the information. That's when you
+
+34
+00:02:59,591 --> 00:03:00,185
+redirect.
+
+35
+00:03:00,185 --> 00:03:06,791
+Cameron Baker on a call with Shop LC — a
+$300M company. The prospect, Vijay,
+
+36
+00:03:06,791 --> 00:03:12,956
+refuses three times to share personal
+information for KYC verification:
+
+37
+00:03:12,956 --> 00:03:20,920
+Vijay: "I
+don't want to share my information
+
+38
+00:03:20,920 --> 00:03:28,885
+because I don't know why my personal
+information is being asked here.".
+
+39
+00:03:28,885 --> 00:03:33,914
+Cameron explains it's for identity
+verification and that the data is deleted
+
+40
+00:03:33,914 --> 00:03:39,277
+if they don't move forward. Vijay refuses
+again: "Still, I don't want to share my
+
+41
+00:03:39,277 --> 00:03:40,216
+information.".
+
+42
+00:03:40,216 --> 00:03:45,561
+Cameron's next move: "Is there maybe a
+business owner that you'd prefer to do
+
+43
+00:03:45,561 --> 00:03:47,600
+identity verification with?".
+
+44
+00:03:47,600 --> 00:03:53,962
+Vijay does not complete identity
+verification on the call. The credit deal closed at $500K.
+
+45
+00:03:53,962 --> 00:03:59,601
+When a concern is personal — this
+specific person won't share — redirect to
+
+46
+00:03:59,601 --> 00:04:05,773
+someone who will. When it's structural —
+company policy prohibits sharing — accept
+
+47
+00:04:05,773 --> 00:04:11,945
+it and offer the Net-1 path. Knowing the
+difference saves you from pushing against
+
+48
+00:04:11,945 --> 00:04:13,698
+a wall that won't move.
+
+49
+00:04:13,698 --> 00:04:19,306
+Not every concern can be resolved. Some
+prospects have company policies that
+
+50
+00:04:19,306 --> 00:04:25,212
+prevent data sharing. Some have portfolio
+company governance that requires board
+
+51
+00:04:25,212 --> 00:04:30,147
+approval. Those are structural —
+technique won't overcome them. But
+
+52
+00:04:30,147 --> 00:04:35,530
+personal concerns — discomfort with
+documents, worry about credit checks,
+
+53
+00:04:35,530 --> 00:04:41,212
+hesitation about personal guarantees —
+those are the ones these three tactics
+
+54
+00:04:41,212 --> 00:04:42,259
+are built for.
+
+55
+00:04:42,259 --> 00:04:46,749
+The next section shows you how to read
+the signals from your discovery
+
+56
+00:04:46,749 --> 00:04:51,889
+conversation and decide what to do next:
+push for float, pivot to Net-1, or flag
+
+57
+00:04:51,889 --> 00:04:53,776
+it for the underwriting team.

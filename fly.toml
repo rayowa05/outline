@@ -1,11 +1,17 @@
 app = "dashfi-kb-staging"
+primary_region = "iad"
+kill_signal = "SIGINT"
+kill_timeout = "5s"
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = "Dockerfile.caddy"
 
 [env]
+  FILE_STORAGE = "s3"
+  FORCE_HTTPS = "false"
+  LOG_LEVEL = "info"
   NODE_ENV = "production"
-  PORT = "3000"
+  PORT = "3001"
 
 [http_service]
   internal_port = 3000
@@ -15,11 +21,18 @@ app = "dashfi-kb-staging"
   min_machines_running = 1
   processes = ["app"]
 
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "45s"
+    method = "GET"
+    path = "/_health"
+
 [mounts]
   source = "outline_data"
   destination = "/var/lib/outline/data"
 
 [[vm]]
-  memory = "1gb"
+  memory_mb = 1024
   cpu_kind = "shared"
   cpus = 1

@@ -1,0 +1,273 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:01.904
+The Application Process.
+
+2
+00:00:01.904 --> 00:00:08.009
+Before we go further, one distinction
+that will save you from setting the wrong
+
+3
+00:00:08.009 --> 00:00:13.410
+expectations: application and
+underwriting are two separate steps. The
+
+4
+00:00:13.410 --> 00:00:19.281
+application verifies the business is real
+— that's KYB and KYC. Underwriting
+
+5
+00:00:19.281 --> 00:00:25.308
+determines terms and limits. A prospect
+can be approved on the application and
+
+6
+00:00:25.308 --> 00:00:31.022
+still not have terms or limits yet. Those
+come from the underwriting team.
+
+7
+00:00:31.022 --> 00:00:36.106
+When your prospect clicks the application
+link, here's what they'll see — five
+
+8
+00:00:36.106 --> 00:00:36.502
+steps.
+
+9
+00:00:36.502 --> 00:00:38.917
+Step one: Qualification.
+
+10
+00:00:38.917 --> 00:00:44.638
+The first screen asks one question: is
+this a US company or an international
+
+11
+00:00:44.638 --> 00:00:50.740
+company? The prospect selects "I'm a US
+company" — the company has a registration
+
+12
+00:00:50.740 --> 00:00:53.638
+number and operates as a legal entity.
+
+13
+00:00:53.638 --> 00:00:56.099
+Step two: Business details.
+
+14
+00:00:56.099 --> 00:01:02.600
+This is the longest step — four tabs. The
+first tab is company details: legal
+
+15
+00:01:02.600 --> 00:01:09.016
+business type, legal company name, DBA,
+industry, a short description of the
+
+16
+00:01:09.016 --> 00:01:14.490
+business, incorporation date,
+incorporation state, company email,
+
+17
+00:01:14.490 --> 00:01:20.992
+company phone, and EIN. The second tab is
+monthly spend — ad spend and non-ad
+
+18
+00:01:20.992 --> 00:01:27.578
+spend, as dropdown ranges. The third tab
+is website address. The fourth tab is
+
+19
+00:01:27.578 --> 00:01:29.118
+operating address.
+
+20
+00:01:29.118 --> 00:01:34.562
+Most of this information the prospect has
+in front of them. If they have their EIN
+
+21
+00:01:34.562 --> 00:01:39.737
+and articles of incorporation ready —
+which you should have asked them to pull
+
+22
+00:01:39.737 --> 00:01:42.493
+together — this step takes a few minutes.
+
+23
+00:01:42.493 --> 00:01:45.604
+Step three: Identity verification.
+
+24
+00:01:45.604 --> 00:01:52.023
+This is the KYC step. Any beneficial
+owner with more than 25% ownership — or,
+
+25
+00:01:52.023 --> 00:01:58.358
+if no one holds more than 25%, the
+controlling officer — clicks "Verify" and
+
+26
+00:01:58.358 --> 00:02:04.609
+follows the prompts: a photo of their
+government-issued ID and a selfie for
+
+27
+00:02:04.609 --> 00:02:10.183
+biometric verification. This is done
+through Plaid and is a federal
+
+28
+00:02:10.183 --> 00:02:13.562
+requirement, not something unique to us.
+
+29
+00:02:13.562 --> 00:02:16.070
+Step four: Terms and conditions.
+
+30
+00:02:16.070 --> 00:02:18.020
+Standard legal acceptance.
+
+31
+00:02:18.020 --> 00:02:20.528
+Step five: Finalize.
+
+32
+00:02:20.528 --> 00:02:25.936
+This is the final screen, and it has four
+items: beneficiaries, controlling
+
+33
+00:02:25.936 --> 00:02:31.709
+officer, bank account, and documents. The
+first two confirm ownership structure.
+
+34
+00:02:31.709 --> 00:02:35.436
+The bank account connection is where
+Plaid comes in.
+
+35
+00:02:35.436 --> 00:02:37.665
+Bank connection — three paths.
+
+36
+00:02:37.665 --> 00:02:43.497
+The fastest path: Plaid connects. The
+prospect authenticates into their bank
+
+37
+00:02:43.497 --> 00:02:48.940
+through Plaid's OAuth flow, and the
+connection verifies instantly. Most
+
+38
+00:02:48.940 --> 00:02:51.040
+applications go this route.
+
+39
+00:02:51.040 --> 00:02:56.564
+If Plaid doesn't connect — and it happens
+— there's a manual path. The prospect
+
+40
+00:02:56.564 --> 00:03:02.370
+enters their routing and account numbers,
+we send a micro-deposit, and they confirm
+
+41
+00:03:02.370 --> 00:03:06.690
+a three-letter code. That takes same-day
+to next business day.
+
+42
+00:03:06.690 --> 00:03:12.000
+If the micro-deposit gets blocked — a
+bank holiday, for example — the prospect
+
+43
+00:03:12.000 --> 00:03:17.171
+uploads a recent bank statement directly
+in the application. It has to be an
+
+44
+00:03:17.171 --> 00:03:22.619
+actual statement, not a screenshot. The
+partner bank requires the real document.
+
+45
+00:03:22.619 --> 00:03:23.873
+Documents.
+
+46
+00:03:23.873 --> 00:03:29.870
+The final item is document upload. For
+Net-1, a bank statement may be all that's
+
+47
+00:03:29.870 --> 00:03:35.259
+needed. For float, this is where 24
+months of P&L and balance sheets get
+
+48
+00:03:35.259 --> 00:03:40.952
+attached — but your prospect should
+already know that from how you framed it
+
+49
+00:03:40.952 --> 00:03:41.939
+in discovery.
+
+50
+00:03:41.939 --> 00:03:45.004
+What happens after they submit.
+
+51
+00:03:45.004 --> 00:03:50.284
+The application goes to the operations
+team for KYB and KYC review. Once
+
+52
+00:03:50.284 --> 00:03:55.192
+approved, the system creates an
+underwriting request — but that's a
+
+53
+00:03:55.192 --> 00:04:00.621
+separate process covered in the next
+module. Application approved does not
+
+54
+00:04:00.621 --> 00:04:06.272
+mean the prospect has a card yet. It
+means the business has been verified and
+
+55
+00:04:06.272 --> 00:04:08.875
+the deal is ready for underwriting.
+
+56
+00:04:08.875 --> 00:04:13.814
+That's the full application — five steps,
+a few minutes for Net-1, a bit longer if
+
+57
+00:04:13.814 --> 00:04:18.692
+float documents need to be attached. When
+you know what your prospect is going to
+
+58
+00:04:18.692 --> 00:04:22.899
+see, you can walk them through it with
+confidence instead of guessing.

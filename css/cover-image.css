@@ -1,0 +1,45 @@
+/* Cover image injected above the document title */
+.cover-image-host > .cover-image-injected {
+  order: -1;
+  margin: 0 -44px;
+  width: calc(100% + 88px);
+  max-height: 280px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.cover-image-host > .cover-image-injected img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Reduce the title's 8vh top margin when cover is present */
+.cover-image-host > .cover-image-injected + * {
+  margin-top: 1.5em !important;
+}
+
+/* Hide the original image inside ProseMirror */
+.ProseMirror .image.cover-image-hidden {
+  display: none !important;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .cover-image-host > .cover-image-injected img {
+    filter: brightness(0.85);
+  }
+}
+
+@media (max-width: 768px) {
+  .cover-image-host > .cover-image-injected {
+    margin: 0 -24px;
+    width: calc(100% + 48px);
+    max-height: 200px;
+  }
+
+  .cover-image-host > .cover-image-injected img {
+    height: 200px;
+  }
+}

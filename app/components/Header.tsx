@@ -29,10 +29,18 @@ type Props = {
     | React.ReactNode;
   hasSidebar?: boolean;
   className?: string;
+  transparentUntilScrolled?: boolean;
 };
 
 function Header(
-  { left, title, actions, hasSidebar, className }: Props,
+  {
+    left,
+    title,
+    actions,
+    hasSidebar,
+    className,
+    transparentUntilScrolled,
+  }: Props,
   ref: React.RefObject<HTMLDivElement> | null
 ) {
   const { ui } = useStores();
@@ -83,6 +91,8 @@ function Header(
         className={className}
         $passThrough={passThrough}
         $insetTitleAdjust={ui.sidebarIsClosed && Desktop.hasInsetTitlebar()}
+        $isScrolled={isScrolled}
+        $transparentUntilScrolled={transparentUntilScrolled}
       >
         {left || hasMobileSidebar ? (
           <Breadcrumbs ref={setBreadcrumbRef}>
@@ -142,6 +152,8 @@ const Actions = styled(Flex)`
 type WrapperProps = {
   $passThrough?: boolean;
   $insetTitleAdjust?: boolean;
+  $isScrolled?: boolean;
+  $transparentUntilScrolled?: boolean;
 };
 
 const Wrapper = styled(Flex)<WrapperProps>`
@@ -154,7 +166,13 @@ const Wrapper = styled(Flex)<WrapperProps>`
     props.$passThrough
       ? `
       background: transparent;
+      backdrop-filter: none;
       pointer-events: none;
+      `
+      : props.$transparentUntilScrolled && !props.$isScrolled
+        ? `
+      background: transparent;
+      backdrop-filter: none;
       `
       : `
       background: ${transparentize(0.2, props.theme.background)};
@@ -173,8 +191,17 @@ const Wrapper = styled(Flex)<WrapperProps>`
   }
 
   @supports (backdrop-filter: blur(20px)) {
-    backdrop-filter: blur(20px);
-    background: ${(props) => transparentize(0.2, props.theme.background)};
+    ${(props) =>
+      props.$passThrough ||
+      (props.$transparentUntilScrolled && !props.$isScrolled)
+        ? `
+        background: transparent;
+        backdrop-filter: none;
+        `
+        : `
+        background: ${transparentize(0.2, props.theme.background)};
+        backdrop-filter: blur(20px);
+        `}
   }
 
   @media print {

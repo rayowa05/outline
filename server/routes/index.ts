@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
 import path from "node:path";
-import { formatRFC7231 } from "date-fns";
+import { addMonths, formatRFC7231 } from "date-fns";
 import Koa from "koa";
 import Router from "koa-router";
 import send from "koa-send";
@@ -11,7 +12,7 @@ import { Day } from "@shared/utils/time";
 import env from "@server/env";
 import { NotFoundError } from "@server/errors";
 import shareDomains from "@server/middlewares/shareDomains";
-import { Integration } from "@server/models";
+import { Integration, User } from "@server/models";
 import { opensearchResponse } from "@server/utils/opensearch";
 import { getTeamFromContext } from "@server/utils/passport";
 import { robotsResponse } from "@server/utils/robots";
@@ -23,33 +24,139 @@ import errors from "./errors";
 
 const koa = new Koa();
 const router = new Router();
+const publicRoot = path.resolve(__dirname, "../../../public");
+const rangeRequestFileExtensions = new Set([".mp3", ".mp4", ".wav", ".webm"]);
+const localhostNames = new Set(["localhost", "127.0.0.1", "::1"]);
+
+router.use(async (ctx, next) => {
+  if (
+    env.isProduction ||
+    !env.LOCALHOST_AUTH_BYPASS ||
+    ctx.cookies.get("accessToken") ||
+    !localhostNames.has(ctx.hostname) ||
+    ctx.method !== "GET" ||
+    ctx.path.startsWith("/api/") ||
+    ctx.path.startsWith("/auth/") ||
+    ctx.path.startsWith("/static/") ||
+    ctx.path.startsWith("/images/") ||
+    ctx.path.startsWith("/fonts/") ||
+    ctx.path.startsWith("/training/")
+  ) {
+    await next();
+    return;
+  }
+
+  const user = await User.scope("withTeam").findOne({
+    where: {
+      email: env.LOCALHOST_AUTH_BYPASS_EMAIL,
+    },
+  });
+
+  if (!user) {
+    await next();
+    return;
+  }
+
+  const expires = addMonths(new Date(), 3);
+  ctx.cookies.set(
+    "accessToken",
+    user.getSessionToken(expires, "localhost-auth-bypass"),
+    {
+      sameSite: "lax",
+      expires,
+    }
+  );
+  ctx.redirect(ctx.originalUrl);
+});
 
 // serve public assets
 router.use(
-  ["/images/*", "/email/*", "/fonts/*", "/h5p-libraries/*", "/h5p-player/*"],
+  [
+    "/images/*",
+    "/email/*",
+    "/fonts/*",
+    "/h5p-libraries/*",
+    "/h5p-player/*",
+    "/training/*",
+  ],
   async (ctx, next) => {
-  let done;
+    let done;
 
-  if (ctx.method === "HEAD" || ctx.method === "GET") {
-    try {
-      done = await send(ctx, ctx.path, {
-        root: path.resolve(__dirname, "../../../public"),
-        // 7 day expiry, these assets are mostly static but do not contain a hash
-        maxAge: Day.ms * 7,
-        setHeaders: (res) => {
-          res.setHeader("Access-Control-Allow-Origin", "*");
-        },
-      });
-    } catch (err) {
-      if (err.status !== 404) {
-        throw err;
+    if (ctx.method === "HEAD" || ctx.method === "GET") {
+      try {
+        const extension = path.extname(ctx.path).toLowerCase();
+        const absolutePath = path.resolve(publicRoot, `.${ctx.path}`);
+        const rangeHeader = ctx.get("range");
+
+        if (
+          ctx.path.startsWith("/training/") &&
+          rangeHeader &&
+          rangeRequestFileExtensions.has(extension) &&
+          absolutePath.startsWith(publicRoot)
+        ) {
+          const stats = await fs.promises.stat(absolutePath);
+          const rangeMatch = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader);
+
+          if (!rangeMatch) {
+            ctx.status = 416;
+            ctx.set("Content-Range", `bytes */${stats.size}`);
+            return;
+          }
+
+          const [, rawStart, rawEnd] = rangeMatch;
+          const start = rawStart ? Number(rawStart) : 0;
+          const end = rawEnd ? Number(rawEnd) : stats.size - 1;
+
+          if (
+            Number.isNaN(start) ||
+            Number.isNaN(end) ||
+            start > end ||
+            start >= stats.size
+          ) {
+            ctx.status = 416;
+            ctx.set("Content-Range", `bytes */${stats.size}`);
+            return;
+          }
+
+          ctx.status = 206;
+          ctx.length = end - start + 1;
+          ctx.type = extension;
+          ctx.set("Accept-Ranges", "bytes");
+          ctx.set("Access-Control-Allow-Origin", "*");
+          ctx.set("Cache-Control", `public, max-age=${7 * Day.seconds}`);
+          ctx.set("Content-Range", `bytes ${start}-${end}/${stats.size}`);
+          ctx.set("Last-Modified", formatRFC7231(stats.mtime));
+          if (ctx.method === "GET") {
+            ctx.body = fs.createReadStream(absolutePath, { start, end });
+          }
+          return;
+        }
+
+        done = await send(ctx, ctx.path, {
+          root: publicRoot,
+          // 7 day expiry, these assets are mostly static but do not contain a hash
+          maxAge: Day.ms * 7,
+          setHeaders: (res, filePath) => {
+            if (
+              rangeRequestFileExtensions.has(
+                path.extname(filePath).toLowerCase()
+              )
+            ) {
+              res.setHeader("Accept-Ranges", "bytes");
+            }
+            res.setHeader("Access-Control-Allow-Origin", "*");
+          },
+        });
+      } catch (err) {
+        if (err.status !== 404) {
+          throw err;
+        }
       }
     }
-  }
 
-  if (!done) {
-    await next();
-  }
+    if (!done) {
+      await next();
+    }
   }
 );
 

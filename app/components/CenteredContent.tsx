@@ -10,8 +10,9 @@ type Props = {
 };
 
 const Container = styled.div<Props>`
+  box-sizing: border-box;
   width: 100%;
-  max-width: 100vw;
+  max-width: 100%;
   padding: ${(props) => (props.withStickyHeader ? "4px 12px" : "60px 12px")};
 
   ${breakpoint("tablet")`
