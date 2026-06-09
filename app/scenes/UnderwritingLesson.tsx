@@ -215,6 +215,8 @@ function UnderwritingLesson() {
   const [checkpointFeedback, setCheckpointFeedback] = useState("");
   const [workflowVideoExpanded, setWorkflowVideoExpanded] = useState(false);
   const [lessonIntroDismissed, setLessonIntroDismissed] = useState(false);
+  const [completionModalDismissed, setCompletionModalDismissed] =
+    useState(false);
   const [lockedReason, setLockedReason] = useState("");
   const [activeRailTab, setActiveRailTab] = useState<
     "objectives" | "path" | "checks"
@@ -361,7 +363,8 @@ function UnderwritingLesson() {
     ? "Replay from beginning"
     : "Replay from last passed skill check";
   const startModalVisible = !reviewMode && !lessonIntroDismissed;
-  const completionModalVisible = !reviewMode && lessonCompleted;
+  const completionModalVisible =
+    !reviewMode && lessonCompleted && !completionModalDismissed;
   const playerModalActive = startModalVisible || completionModalVisible;
   const activeCaption = useMemo(() => {
     if (!captionsEnabled || !captionCues.length) {
@@ -535,6 +538,16 @@ function UnderwritingLesson() {
       mediaRef.current.playbackRate = rate;
     }
   }, []);
+
+  const dismissStartModal = useCallback(() => {
+    window.localStorage.setItem(introStorageKey, "dismissed");
+    setLessonIntroDismissed(true);
+    window.setTimeout(() => void mediaRef.current?.play(), 50);
+  }, [introStorageKey]);
+
+  useEffect(() => {
+    setCompletionModalDismissed(false);
+  }, [lessonKey]);
 
   useEffect(() => {
     if (!serverProgressReconciled) {
@@ -1494,6 +1507,17 @@ function UnderwritingLesson() {
               {startModalVisible ? (
                 <LessonModalOverlay data-testid="lesson-start-modal">
                   <LessonModalPanel>
+                    <LessonModalClose
+                      aria-label={
+                        isDocumentLesson
+                          ? "Close job aid review prompt"
+                          : "Close lesson notes prompt"
+                      }
+                      onClick={dismissStartModal}
+                      type="button"
+                    >
+                      ×
+                    </LessonModalClose>
                     <LessonModalKicker>
                       {isDocumentLesson
                         ? "Required job aid"
@@ -1510,17 +1534,7 @@ function UnderwritingLesson() {
                         : `Your Module ${module.number} notes stay with you across this module and will be available during the quiz. You need 100% to pass, so capture the signals, examples, and tactics as you go.`}
                     </LessonModalCopy>
                     <LessonModalButton
-                      onClick={() => {
-                        window.localStorage.setItem(
-                          introStorageKey,
-                          "dismissed"
-                        );
-                        setLessonIntroDismissed(true);
-                        window.setTimeout(
-                          () => void mediaRef.current?.play(),
-                          50
-                        );
-                      }}
+                      onClick={dismissStartModal}
                       type="button"
                     >
                       {isDocumentLesson ? "Start review" : "Start lesson"}
@@ -1536,6 +1550,13 @@ function UnderwritingLesson() {
                   <LessonModalPanel
                     $complete={isFinalCourseLesson && !hasSkillCheckMiss}
                   >
+                    <LessonModalClose
+                      aria-label="Close completion prompt"
+                      onClick={() => setCompletionModalDismissed(true)}
+                      type="button"
+                    >
+                      ×
+                    </LessonModalClose>
                     {isFinalCourseLesson && !hasSkillCheckMiss ? (
                       <CourseConfetti aria-hidden="true">
                         {Array.from({ length: 88 }).map((_, index) => (
@@ -6528,10 +6549,35 @@ const LessonModalPanel = styled.div<{ $complete?: boolean }>`
   justify-items: start;
   max-width: 680px;
   padding: 32px;
+  position: relative;
   width: min(680px, 100%);
 
   @media (max-width: 640px) {
     padding: 24px;
+  }
+`;
+
+const LessonModalClose = styled.button`
+  align-items: center;
+  background: transparent;
+  border: 1px solid rgba(32, 48, 45, 0.18);
+  border-radius: 999px;
+  color: ${brand.ink};
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 22px;
+  font-weight: 700;
+  height: 34px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0 0 2px;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 34px;
+
+  &:hover {
+    background: ${brand.mutedBlock};
   }
 `;
 
