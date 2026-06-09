@@ -72,7 +72,9 @@ function AuthenticatedRoutes() {
   const canAccessLearning = [
     "lucas@dash.fi",
     "lukas.geipel@dash.fi",
+    "nemanja@dash.fi",
     "ray@dash.fi",
+    "reid@dash.fi",
   ].includes(user.email);
 
   return (
