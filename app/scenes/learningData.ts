@@ -50,11 +50,11 @@ export const underwritingCourse: LearningCourse = {
   eyebrow: "Required AE certification",
   status: "active",
   audience: "Sales, onboarding, and manager coaching",
-  duration: "70 min",
-  moduleCount: 4,
-  lessonCount: 16,
-  extraItems: "2 required knowledge checks and 1 required job aid",
-  progressLabel: "0 of 4 modules complete",
+  duration: "75 min",
+  moduleCount: 3,
+  lessonCount: 17,
+  extraItems: "2 required knowledge checks and 2 required job aids",
+  progressLabel: "0 of 3 modules complete",
   description:
     "Build the judgment to qualify advertisers for Dash.fi underwriting, set clean expectations, and submit useful context.",
   modules: [
@@ -176,11 +176,11 @@ export const underwritingCourse: LearningCourse = {
       title: "Underwriting Workflow",
       subtitle: "Submit clean requests and manage review",
       status: "assetReady",
-      duration: "12 min",
-      lessonCount: 3,
+      duration: "22 min",
+      lessonCount: 5,
       completion: 0,
       summary:
-        "Workflow drills for submitting requests, reading review status, and handling limit increase conversations.",
+        "Workflow drills for submitting requests, reading review status, handling limit increases, and saving the required underwriting job aids.",
       lessons: [
         {
           number: 1,
@@ -203,26 +203,21 @@ export const underwritingCourse: LearningCourse = {
           kind: "video",
           status: "assetReady",
         },
-      ],
-    },
-    {
-      number: 4,
-      title: "UW Process Job Aid",
-      subtitle: "Internal underwriting process",
-      status: "assetReady",
-      duration: "5 min",
-      lessonCount: 1,
-      completion: 0,
-      summary:
-        "Review the internal underwriting process job aid and save it in the KB before certification is complete.",
-      lessons: [
         {
-          number: 1,
+          number: 4,
           title: "UW Process/Internal Process",
           duration: "5 min",
           kind: "document",
           status: "assetReady",
-          note: "Required final job aid review. Scroll through the document to complete certification.",
+          note: "Required job aid review. Scroll through the document to complete certification.",
+        },
+        {
+          number: 5,
+          title: "New Underwriting Discovery & Positioning",
+          duration: "5 min",
+          kind: "document",
+          status: "assetReady",
+          note: "Required job aid review. Scroll through the document to complete certification.",
         },
       ],
     },

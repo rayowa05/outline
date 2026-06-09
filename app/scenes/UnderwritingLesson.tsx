@@ -67,7 +67,7 @@ const SKILL_CHECK_REPLAY_BUFFER_SECONDS = 5;
 const SKILL_CHECK_MISS_PROMPT =
   "Not quite. This skill check is required to move forward. You can continue the lesson now, but you'll need to replay this section and answer it correctly before completing the lesson.";
 const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5] as const;
-const UNDERWRITING_PROCESS_DOCUMENT_ID = "2m3IlLBz2i";
+const DEFAULT_UNDERWRITING_PROCESS_DOCUMENT_ID = "2m3IlLBz2i";
 const DOCUMENT_REVIEW_DURATION_SECONDS = 300;
 
 type PlaybackRate = (typeof PLAYBACK_RATES)[number];
@@ -289,6 +289,10 @@ function UnderwritingLesson() {
   const lessonKey = `${activeModule}-${activeLesson}`;
   const introStorageKey = `dashfi.learning.underwriting.lesson-intro.${lessonKey}`;
   const production = underwritingLessonProductionData[lessonKey];
+  const documentId =
+    production?.documentId ?? DEFAULT_UNDERWRITING_PROCESS_DOCUMENT_ID;
+  const documentPath =
+    production?.documentPath ?? `/doc/uw-process-internal-process-${documentId}`;
   const sections = production?.sections ?? [];
   const media = production?.media;
   const hasWorkflowVideo = Boolean(media?.videoSrc);
@@ -614,7 +618,7 @@ function UnderwritingLesson() {
 
     void client
       .post<DocumentInfoResponse>("/documents.info", {
-        id: UNDERWRITING_PROCESS_DOCUMENT_ID,
+        id: documentId,
       })
       .then((response) => {
         if (!mounted) {
@@ -637,7 +641,7 @@ function UnderwritingLesson() {
     return () => {
       mounted = false;
     };
-  }, [isDocumentLesson, lessonCompleted, lessonKey]);
+  }, [documentId, isDocumentLesson, lessonCompleted, lessonKey]);
 
   const updateDocumentReviewProgress = useCallback(() => {
     const node = documentReviewRef.current;
@@ -1259,6 +1263,7 @@ function UnderwritingLesson() {
                     {isDocumentLesson ? (
                       <JobAidReader
                         document={jobAidDocument}
+                        documentPath={documentPath}
                         loadStatus={documentLoadStatus}
                         onScroll={updateDocumentReviewProgress}
                         progress={documentReviewProgress}
@@ -1496,7 +1501,7 @@ function UnderwritingLesson() {
                     </LessonModalTitle>
                     <LessonModalCopy>
                       {isDocumentLesson
-                        ? "Scroll through the UW Process/Internal Process job aid and star or save it in the KB. This review is required before certification is complete."
+                        ? "Scroll through the required job aid and star or save it in the KB. This review is required before certification is complete."
                         : `Your Module ${module.number} notes stay with you across this module and will be available during the quiz. You need 100% to pass, so capture the signals, examples, and tactics as you go.`}
                     </LessonModalCopy>
                     <LessonModalButton
@@ -1822,14 +1827,16 @@ const JobAidReader = forwardRef<
   HTMLDivElement,
   {
     document: JobAidDocument | null;
+    documentPath: string;
     loadStatus: "idle" | "loading" | "ready" | "error";
     onScroll: () => void;
     progress: number;
   }
->(function JobAidReader({ document, loadStatus, onScroll, progress }, ref) {
-  const documentUrl =
-    document?.url ??
-    `/doc/uw-process-internal-process-${UNDERWRITING_PROCESS_DOCUMENT_ID}`;
+>(function JobAidReader(
+  { document, documentPath, loadStatus, onScroll, progress },
+  ref
+) {
+  const documentUrl = document?.url ?? documentPath;
 
   if (loadStatus === "loading" || loadStatus === "idle") {
     return (

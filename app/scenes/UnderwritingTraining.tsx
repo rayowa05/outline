@@ -231,10 +231,19 @@ function UnderwritingModuleCard({
   const state = moduleStates[isLocked ? "locked" : status.state];
   const moduleStartPath = underwritingLessonPath(module.number, 1);
   const accent = moduleAccent(module.number);
-  const hasDocumentReview = module.lessons.some(
+  const documentReviewCount = module.lessons.filter(
     (lesson) => lesson.kind === "document"
-  );
-  const moduleAction = hasDocumentReview ? "Review job aid" : status.action;
+  ).length;
+  const drillCount = module.lessons.length - documentReviewCount;
+  const hasOnlyDocumentReview =
+    documentReviewCount > 0 && documentReviewCount === module.lessons.length;
+  const moduleAction = hasOnlyDocumentReview ? "Review job aid" : status.action;
+  const lessonCountLabel =
+    documentReviewCount > 0 && drillCount > 0
+      ? `${drillCount} field drills + ${documentReviewCount} job aid`
+      : hasOnlyDocumentReview
+        ? `${module.lessonCount} required review`
+        : `${module.lessonCount} field drills`;
 
   return (
     <ModuleCard
@@ -260,10 +269,7 @@ function UnderwritingModuleCard({
         <CardDescription>{module.summary}</CardDescription>
         <CardFooter data-learning-section="lesson-count">
           <Outcome>
-            <TargetIcon size={14} />{" "}
-            {hasDocumentReview
-              ? `${module.lessonCount} required review`
-              : `${module.lessonCount} field drills`}
+            <TargetIcon size={14} /> {lessonCountLabel}
           </Outcome>
           <StatusPill $tone={isLocked ? "muted" : status.tone}>
             {isLocked ? "Locked" : status.label}
@@ -400,7 +406,7 @@ const ModuleGrid = styled.div`
   `};
 
   ${breakpoint("desktop")`
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   `};
 `;
 

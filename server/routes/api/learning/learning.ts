@@ -33,12 +33,34 @@ const router = new Router();
 const UNDERWRITING_COURSE_ID = "underwriting-training";
 const UNDERWRITING_COURSE_TITLE = "Underwriting Training";
 const UNDERWRITING_COURSE_PATH = "/learning/underwriting-training";
-const UNDERWRITING_REQUIRED_LESSON_COUNT = 14;
+const UNDERWRITING_REQUIRED_LESSON_KEYS = [
+  "1-1",
+  "1-2",
+  "1-3",
+  "1-4",
+  "2-1",
+  "2-2",
+  "2-3",
+  "2-4",
+  "2-5",
+  "2-6",
+  "3-1",
+  "3-2",
+  "3-3",
+  "3-4",
+  "3-5",
+] as const;
+const UNDERWRITING_REQUIRED_LESSON_COUNT =
+  UNDERWRITING_REQUIRED_LESSON_KEYS.length;
 const UNDERWRITING_REQUIRED_QUIZ_COUNT = 2;
 const UNDERWRITING_REQUIRED_SKILL_CHECK_COUNT = 24;
-const UNDERWRITING_MODULE_THREE_LESSON_COUNT = 3;
 const UNDERWRITING_CERTIFIED_BADGE_ID = "underwriting-certified";
 const DEFAULT_DUE_DAYS = 14;
+const UNDERWRITING_LEGACY_LESSON_KEY_ALIASES: Partial<
+  Record<(typeof UNDERWRITING_REQUIRED_LESSON_KEYS)[number], string>
+> = {
+  "3-4": "4-1",
+};
 
 interface LearningReportRow {
   learnerId: string;
@@ -158,8 +180,15 @@ function getLessonKey(moduleNumber: number, lessonNumber: number) {
 
 function countCompletedLessons(progress: LearningProgressState | null) {
   const lessons = progress?.lessons ?? {};
-  return Object.values(lessons).filter((lesson) => lesson.lessonCompleted)
-    .length;
+
+  return UNDERWRITING_REQUIRED_LESSON_KEYS.filter((lessonKey) => {
+    const legacyKey = UNDERWRITING_LEGACY_LESSON_KEY_ALIASES[lessonKey];
+
+    return Boolean(
+      lessons[lessonKey]?.lessonCompleted ||
+        (legacyKey && lessons[legacyKey]?.lessonCompleted)
+    );
+  }).length;
 }
 
 function countCompletedSkillChecks(progress: LearningProgressState | null) {
@@ -246,26 +275,9 @@ function hasPassedModuleQuiz(
   return Boolean(progress?.quizzes?.[quiz.id]?.passed);
 }
 
-function hasCompletedModuleLessons(
-  progress: LearningProgressState | null,
-  moduleNumber: number,
-  lessonCount: number
-) {
-  const lessons = progress?.lessons ?? {};
-
-  return Array.from({ length: lessonCount }, (_, index) =>
-    Boolean(lessons[getLessonKey(moduleNumber, index + 1)]?.lessonCompleted)
-  ).every(Boolean);
-}
-
 function buildGateState(progress: LearningProgressState | null) {
   const moduleOneQuiz = getUnderwritingQuizByModule(1);
   const moduleTwoQuiz = getUnderwritingQuizByModule(2);
-  const moduleThreeComplete = hasCompletedModuleLessons(
-    progress,
-    3,
-    UNDERWRITING_MODULE_THREE_LESSON_COUNT
-  );
 
   return [
     {
@@ -292,15 +304,6 @@ function buildGateState(progress: LearningProgressState | null) {
       moduleNumber: 3,
       quizPassed: true,
       requiredQuizId: moduleTwoQuiz?.id ?? null,
-    },
-    {
-      locked: !moduleThreeComplete,
-      lockedReason: moduleThreeComplete
-        ? null
-        : "Complete the Module 3 workflow lessons to unlock the required job aid review.",
-      moduleNumber: 4,
-      quizPassed: true,
-      requiredQuizId: null,
     },
   ];
 }

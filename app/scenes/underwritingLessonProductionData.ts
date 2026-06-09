@@ -59,6 +59,8 @@ export type LessonCheckpoint = {
 
 export type LessonProductionBlueprint = {
   objectives: string[];
+  documentId?: string;
+  documentPath?: string;
   media?: LessonMedia;
   sections: LessonSection[];
   checkpoints?: LessonCheckpoint[];
@@ -1907,7 +1909,9 @@ export const underwritingLessonProductionData: Record<
       "No in-video skill checks for Module 3 during the audit pass.",
     ],
   },
-  "4-1": {
+  "3-4": {
+    documentId: "2m3IlLBz2i",
+    documentPath: "/doc/uw-process-internal-process-2m3IlLBz2i",
     objectives: [
       "Review the UW Process/Internal Process job aid.",
       "Identify where the internal process lives in the KB.",
@@ -1921,6 +1925,30 @@ export const underwritingLessonProductionData: Record<
         end: 300,
         kind: "takeaway",
         stageTitle: "UW Process/Internal Process",
+        stageCopy:
+          "Scroll through the required KB job aid. Completion unlocks once you reach the end of the document.",
+      },
+    ],
+    productionNotes: [
+      "Required launch job-aid review unit. The document content is loaded from the Outline KB document by urlId.",
+    ],
+  },
+  "3-5": {
+    documentId: "i9VN62jCmM",
+    documentPath: "/doc/new-underwriting-discovery-positioning-i9VN62jCmM",
+    objectives: [
+      "Review the New Underwriting Discovery & Positioning job aid.",
+      "Identify how discovery questions should surface underwriting context before handoff.",
+      "Save the job aid so it is available during live underwriting discovery work.",
+    ],
+    sections: [
+      {
+        id: "section-1",
+        title: "Required discovery positioning job aid review",
+        start: 0,
+        end: 300,
+        kind: "takeaway",
+        stageTitle: "New Underwriting Discovery & Positioning",
         stageCopy:
           "Scroll through the required KB job aid. Completion unlocks once you reach the end of the document.",
       },
