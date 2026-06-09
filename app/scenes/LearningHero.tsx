@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { observer } from "mobx-react";
 import styled from "styled-components";
 import breakpoint from "styled-components-breakpoint";
+import useStores from "~/hooks/useStores";
 import LearningNavigation from "./LearningNavigation";
 
 type LearningHeroPage =
@@ -17,16 +19,26 @@ type Props = {
   children: ReactNode;
 };
 
-export default function LearningHero({
+function LearningHero({
   children,
   current,
   eyebrow,
   title,
 }: Props) {
+  const { auth } = useStores();
+  const user = auth.user;
+
   return (
     <Hero data-testid="learning-hero">
       <HeroCopy>
-        <Eyebrow>{eyebrow}</Eyebrow>
+        <HeroMeta>
+          <Eyebrow>{eyebrow}</Eyebrow>
+          {user ? (
+            <SignedIn title={user.email}>
+              Signed in as {user.name || user.email}
+            </SignedIn>
+          ) : null}
+        </HeroMeta>
         <HeroTitle>{title}</HeroTitle>
         <HeroText>{children}</HeroText>
       </HeroCopy>
@@ -36,6 +48,8 @@ export default function LearningHero({
     </Hero>
   );
 }
+
+export default observer(LearningHero);
 
 const brand = {
   dark: "#11131f",
@@ -54,24 +68,32 @@ const Hero = styled.section`
   border-radius: 8px;
   color: #fff;
   display: grid;
-  gap: 18px;
-  min-height: 176px;
+  gap: 14px;
   overflow: hidden;
-  padding: 22px;
+  padding: 14px 16px;
   position: relative;
 
+  ${breakpoint("desktop")`
+    align-items: start;
+    grid-template-columns: minmax(220px, 0.36fr) minmax(0, 0.64fr);
+  `};
+
   @media (min-width: 1440px) {
-    min-height: 176px;
-    padding: 28px 30px;
+    grid-template-columns: minmax(260px, 0.32fr) minmax(0, 0.68fr);
+    padding: 16px 18px;
   }
 `;
 
 const HeroCopy = styled.div`
   min-width: 0;
+`;
 
-  @media (min-width: 1440px) {
-    max-width: calc(100% - 800px);
-  }
+const HeroMeta = styled.div`
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 8px;
 `;
 
 const Eyebrow = styled.div`
@@ -81,51 +103,59 @@ const Eyebrow = styled.div`
   font-weight: 800;
   letter-spacing: 0.1em;
   line-height: 1.2;
-  margin-bottom: 8px;
   text-transform: uppercase;
 
   ${breakpoint("tablet")`
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    margin-bottom: 10px;
+    letter-spacing: 0.12em;
   `};
+`;
+
+const SignedIn = styled.div`
+  color: rgba(255, 255, 255, 0.72);
+  font-family: ${brand.mono};
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const HeroTitle = styled.h1`
   color: #fff;
   font-family: ${brand.mono};
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.1;
   margin: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 
   ${breakpoint("tablet")`
-    font-size: 30px;
+    font-size: 26px;
   `};
 
   @media (min-width: 1440px) {
-    font-size: 32px;
+    font-size: 28px;
   }
 `;
 
 const HeroText = styled.div`
   color: rgba(255, 255, 255, 0.76);
   font-size: 14px;
-  line-height: 1.4;
-  margin: 8px 0 0;
-  max-width: 680px;
-  overflow-wrap: anywhere;
+  line-height: 1.35;
+  margin: 6px 0 0;
+  max-width: 520px;
+  overflow-wrap: normal;
+  word-break: normal;
 
   ${breakpoint("tablet")`
-    font-size: 15px;
+    font-size: 14px;
   `};
 
   @media (min-width: 1440px) {
-    font-size: 16px;
-    line-height: 1.5;
-    margin-top: 10px;
+    font-size: 15px;
   }
 `;
 
@@ -134,11 +164,7 @@ const NavSlot = styled.div`
   justify-items: start;
   min-width: 0;
 
-  @media (min-width: 1440px) {
-    justify-items: stretch;
-    position: absolute;
-    right: 30px;
-    top: 28px;
-    width: 760px;
-  }
+  ${breakpoint("desktop")`
+    justify-items: end;
+  `};
 `;

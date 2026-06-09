@@ -303,7 +303,7 @@ const Alert = styled.div`
 
 const ReadinessGrid = styled.section`
   display: grid;
-  gap: 10px;
+  gap: 8px;
 
   ${breakpoint("tablet")`
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -319,28 +319,31 @@ const ReadinessCard = styled.article`
   border: 1px solid ${brand.rule};
   border-top: 4px solid ${brand.blue};
   border-radius: 8px;
-  display: grid;
-  gap: 7px;
-  min-height: 86px;
-  padding: 14px;
+  align-items: center;
+  display: flex;
+  gap: 9px;
+  justify-content: center;
+  min-height: unset;
+  padding: 10px 12px;
   box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
+  white-space: nowrap;
 `;
 
 const ReadinessValue = styled.div`
   color: ${brand.blue};
   font-family: ${brand.mono};
-  font-size: 22px;
+  font-size: 15px;
   font-weight: 800;
-  line-height: 1.08;
+  line-height: 1;
 `;
 
 const ReadinessLabel = styled.div`
   color: ${brand.muted};
   font-family: ${brand.mono};
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1.25;
+  letter-spacing: 0;
+  line-height: 1;
   text-transform: uppercase;
 `;
 
@@ -352,8 +355,8 @@ const ProgressPanel = styled.section`
   border-top: 4px solid ${brand.blue};
   border-radius: 8px;
   display: grid;
-  gap: 18px;
-  padding: 18px;
+  gap: 14px;
+  padding: 14px;
   box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
 
   ${breakpoint("tablet")`

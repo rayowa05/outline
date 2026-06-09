@@ -266,7 +266,7 @@ const Alert = styled.div`
 
 const MetricGrid = styled.section`
   display: grid;
-  gap: 12px;
+  gap: 8px;
 
   ${breakpoint("tablet")`
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -282,17 +282,20 @@ const MetricCard = styled.article`
   border: 1px solid ${brand.rule};
   border-top: 4px solid ${brand.blue};
   border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  min-height: 86px;
-  padding: 14px;
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: unset;
+  padding: 10px 12px;
   box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
+  white-space: nowrap;
 `;
 
 const MetricValue = styled.div`
   color: ${brand.ink};
   font-family: ${brand.mono};
-  font-size: 28px;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1;
 `;
@@ -300,15 +303,15 @@ const MetricValue = styled.div`
 const MetricLabel = styled.div`
   color: ${brand.muted};
   font-family: ${brand.mono};
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 `;
 
 const PodiumGrid = styled.section`
   display: grid;
-  gap: 12px;
+  gap: 10px;
 
   ${breakpoint("tablet")`
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -322,9 +325,9 @@ const PodiumCard = styled.article<{ $rank: number }>`
   border-top: 4px solid ${(props) => podiumRule(props.$rank)};
   border-radius: 8px;
   display: grid;
-  gap: 12px;
-  min-height: 210px;
-  padding: 18px;
+  gap: 9px;
+  min-height: 154px;
+  padding: 14px;
   box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
 `;
 
@@ -337,9 +340,9 @@ const Rank = styled.div`
   font-family: ${brand.mono};
   font-size: 12px;
   font-weight: 900;
-  height: 30px;
+  height: 26px;
   justify-content: center;
-  min-width: 42px;
+  min-width: 36px;
   padding: 0 8px;
   width: max-content;
 `;
@@ -347,7 +350,7 @@ const Rank = styled.div`
 const LearnerName = styled.h2`
   color: ${brand.ink};
   font-family: ${brand.mono};
-  font-size: 24px;
+  font-size: 19px;
   font-weight: 400;
   line-height: 1.12;
   margin: 0;
@@ -363,7 +366,7 @@ const ProgressLine = styled.div`
   strong {
     color: ${brand.ink};
     font-family: ${brand.mono};
-    font-size: 22px;
+    font-size: 17px;
   }
 
   span {

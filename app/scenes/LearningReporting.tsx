@@ -1016,11 +1016,10 @@ const ToolbarButton = styled.button`
 
 const MetricGrid = styled.section`
   display: grid;
-  gap: 10px;
-
-  ${breakpoint("tablet")`
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  `};
+  gap: 8px;
+  grid-template-columns: repeat(6, minmax(118px, 1fr));
+  overflow-x: auto;
+  padding-bottom: 2px;
 `;
 
 const MetricCard = styled.article<{ $tone?: "warning" }>`
@@ -1033,17 +1032,20 @@ const MetricCard = styled.article<{ $tone?: "warning" }>`
   border-top: 4px solid
     ${(props) => (props.$tone === "warning" ? "#f5c77e" : brand.blue)};
   border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  min-height: 92px;
-  padding: 14px;
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: unset;
+  padding: 10px 12px;
   box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
+  white-space: nowrap;
 `;
 
 const MetricValue = styled.div`
   color: ${brand.ink};
   font-family: ${brand.mono};
-  font-size: 25px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 1;
 `;
@@ -1051,9 +1053,9 @@ const MetricValue = styled.div`
 const MetricLabel = styled.div`
   color: ${brand.muted};
   font-family: ${brand.mono};
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 `;
 

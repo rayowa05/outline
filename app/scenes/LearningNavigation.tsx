@@ -150,7 +150,7 @@ const brand = {
 
 const NavWrap = styled.div`
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 `;
 
@@ -158,12 +158,9 @@ const Nav = styled.nav`
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  min-height: 40px;
-
-  @media (min-width: 1024px) {
-    flex-wrap: nowrap;
-  }
+  gap: 6px;
+  justify-content: flex-start;
+  min-height: 34px;
 `;
 
 const NavButton = styled.a<{ $active?: boolean; $overview?: boolean }>`
@@ -186,14 +183,14 @@ const NavButton = styled.a<{ $active?: boolean; $overview?: boolean }>`
     props.$overview ? "#fff" : props.$active ? brand.dark : brand.ink};
   display: inline-flex;
   font-family: ${brand.mono};
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
-  gap: 6px;
-  height: 40px;
+  gap: 5px;
+  height: 34px;
   justify-content: center;
   letter-spacing: 0;
   min-width: min-content;
-  padding: 0 10px;
+  padding: 0 9px;
   text-decoration: none;
   text-transform: uppercase;
   white-space: nowrap;
@@ -207,9 +204,7 @@ const NavButton = styled.a<{ $active?: boolean; $overview?: boolean }>`
   }
 
   @media (min-width: 1440px) {
-    font-size: 11px;
-    height: 42px;
-    padding: 0 12px;
+    height: 36px;
   }
 `;
 
@@ -221,10 +216,10 @@ const FirstVisitHelp = styled.div`
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
   color: ${brand.ink};
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: space-between;
-  max-width: 676px;
-  padding: 10px 10px 10px 12px;
+  max-width: 460px;
+  padding: 8px 8px 8px 10px;
 `;
 
 const HelpCopy = styled.div`
@@ -244,8 +239,8 @@ const HelpCopy = styled.div`
 
   span {
     color: rgba(32, 48, 45, 0.78);
-    font-size: 12px;
-    line-height: 1.3;
+    font-size: 11px;
+    line-height: 1.25;
   }
 `;
 

@@ -183,15 +183,15 @@ const Page = styled.div`
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   margin: 0;
   min-width: 0;
   padding: 14px 16px 48px;
 
   ${breakpoint("tablet")`
-    gap: 22px;
+    gap: 16px;
     margin: -40px -28px 0;
-    padding: 18px 28px 64px;
+    padding: 18px 28px 56px;
   `};
 `;
 
@@ -211,10 +211,10 @@ const FeaturedCourse = styled(Link)`
   border-radius: 8px;
   color: ${brand.ink};
   display: grid;
-  gap: 18px;
-  min-height: 340px;
+  gap: 14px;
+  min-height: unset;
   overflow: hidden;
-  padding: 18px;
+  padding: 16px;
   text-decoration: none;
   box-shadow: 0 10px 22px rgba(28, 32, 24, 0.04);
 
@@ -226,7 +226,7 @@ const FeaturedCourse = styled(Link)`
 
   ${breakpoint("tablet")`
     grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
-    padding: 22px;
+    padding: 18px;
   `};
 `;
 
@@ -240,32 +240,32 @@ const FeaturedCopy = styled.div`
 const FeaturedKicker = styled.div`
   color: ${brand.blue};
   font-family: ${brand.mono};
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.16em;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   text-transform: uppercase;
 `;
 
 const FeaturedTitle = styled.h2`
   color: ${brand.ink};
   font-family: ${brand.mono};
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: 0;
   line-height: 1.1;
   margin: 0;
 
   ${breakpoint("tablet")`
-    font-size: 42px;
+    font-size: 34px;
   `};
 `;
 
 const FeaturedDescription = styled.p`
   color: ${brand.muted};
   font-size: 15px;
-  line-height: 1.55;
-  margin: 14px 0 0;
+  line-height: 1.42;
+  margin: 10px 0 0;
   max-width: 620px;
 `;
 
@@ -273,8 +273,8 @@ const CourseMeta = styled.div`
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
+  gap: 8px;
+  margin-top: 14px;
 `;
 
 const MetaItem = styled.span`
@@ -316,10 +316,10 @@ const PrimaryAction = styled.span`
   font-size: 13px;
   font-weight: 700;
   gap: 8px;
-  height: 38px;
+  height: 36px;
   justify-content: center;
   justify-self: start;
-  margin-top: 24px;
+  margin-top: 16px;
   padding: 0 14px;
   text-transform: uppercase;
 `;
@@ -331,10 +331,10 @@ const CourseCover = styled.div`
   border-radius: 8px;
   color: #fff;
   display: grid;
-  gap: 18px;
-  min-height: 260px;
+  gap: 12px;
+  min-height: 202px;
   overflow: hidden;
-  padding: 18px;
+  padding: 15px;
   position: relative;
 
   &::before {
@@ -363,7 +363,7 @@ const CoverTopline = styled.div`
 const CoverModules = styled.div`
   align-self: end;
   display: grid;
-  gap: 10px;
+  gap: 8px;
   position: relative;
   z-index: 1;
 `;
@@ -373,8 +373,8 @@ const CoverModule = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
   display: grid;
-  gap: 4px;
-  padding: 13px;
+  gap: 3px;
+  padding: 10px 12px;
 
   span {
     color: rgba(255, 255, 255, 0.64);
