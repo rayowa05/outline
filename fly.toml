@@ -6,6 +6,9 @@ kill_timeout = "5s"
 [build]
   dockerfile = "Dockerfile.caddy"
 
+[deploy]
+  release_command = "sh -lc 'corepack enable && yarn db:migrate'"
+
 [env]
   FILE_STORAGE = "s3"
   FORCE_HTTPS = "false"

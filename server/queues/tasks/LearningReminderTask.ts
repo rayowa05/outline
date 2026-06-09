@@ -3,6 +3,10 @@ import { Op } from "sequelize";
 import LearningReminderEmail from "@server/emails/templates/LearningReminderEmail";
 import { LearningAssignment, Team, User } from "@server/models";
 import { LearningAssignmentStatus } from "@server/models/LearningAssignment";
+import {
+  isLearningSlackNotificationConfigured,
+  sendLearningEnrollmentSlackNotification,
+} from "@server/utils/learningSlackNotifications";
 import { TaskPriority } from "./base/BaseTask";
 import { CronTask, TaskInterval } from "./base/CronTask";
 
@@ -38,6 +42,7 @@ export default class LearningReminderTask extends CronTask {
       const dueAt = assignment.dueAt;
       const dueAtLabel = dueAt ? format(dueAt, "MMM d, yyyy") : null;
       const learningUrl = `${assignment.team.url}${UNDERWRITING_COURSE_PATH}`;
+      let enrollmentEmailSent = false;
 
       if (!assignment.enrollmentReminderSentAt) {
         await new LearningReminderEmail({
@@ -53,6 +58,30 @@ export default class LearningReminderTask extends CronTask {
 
         assignment.enrollmentReminderSentAt = now;
         await assignment.save();
+        enrollmentEmailSent = true;
+      }
+
+      if (
+        isLearningSlackNotificationConfigured() &&
+        !assignment.slackEnrollmentReminderSentAt
+      ) {
+        const result = await sendLearningEnrollmentSlackNotification({
+          dueAt,
+          learner: assignment.user,
+          learningUrl,
+        });
+
+        if (result.sent) {
+          assignment.slackEnrollmentReminderError = null;
+          assignment.slackEnrollmentReminderSentAt = now;
+          await assignment.save();
+        } else if (!result.skipped) {
+          assignment.slackEnrollmentReminderError = result.error;
+          await assignment.save();
+        }
+      }
+
+      if (enrollmentEmailSent) {
         continue;
       }
 

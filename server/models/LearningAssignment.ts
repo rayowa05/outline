@@ -91,6 +91,12 @@ class LearningAssignment extends IdModel<
   enrollmentReminderSentAt: Date | null;
 
   @Column(DataType.DATE)
+  slackEnrollmentReminderSentAt: Date | null;
+
+  @Column(DataType.TEXT)
+  slackEnrollmentReminderError: string | null;
+
+  @Column(DataType.DATE)
   dueSoonReminderSentAt: Date | null;
 
   @Column(DataType.DATE)

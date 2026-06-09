@@ -397,6 +397,14 @@ export class Environment {
   @IsInCaseInsensitive(Object.keys(wellKnownServices))
   public SMTP_SERVICE = this.toOptionalString(environment.SMTP_SERVICE);
 
+  /**
+   * Slack bot token used for Learning Hub direct-message notifications.
+   */
+  @IsOptional()
+  public LEARNING_SLACK_BOT_TOKEN = this.toOptionalString(
+    environment.LEARNING_SLACK_BOT_TOKEN ?? environment.SLACK_BOT_TOKEN
+  );
+
   @Public
   public EMAIL_ENABLED =
     !!(this.SMTP_HOST || this.SMTP_SERVICE) || this.isDevelopment;

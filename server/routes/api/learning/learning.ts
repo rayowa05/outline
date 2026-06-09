@@ -24,6 +24,10 @@ import {
 import { sequelize } from "@server/storage/database";
 import type { APIContext } from "@server/types";
 import {
+  isLearningSlackNotificationConfigured,
+  sendLearningEnrollmentSlackNotification,
+} from "@server/utils/learningSlackNotifications";
+import {
   getUnderwritingQuizById,
   getUnderwritingQuizByModule,
 } from "@shared/learning/underwritingQuizContent";
@@ -417,6 +421,23 @@ async function sendEnrollmentEmail(
   }).schedule();
 
   return true;
+}
+
+async function sendEnrollmentSlackNotification(
+  assignment: LearningAssignment,
+  learner: User
+) {
+  const team = await assignment.$get("team");
+
+  if (!team) {
+    throw NotFoundError("Learning assignment team not found");
+  }
+
+  return sendLearningEnrollmentSlackNotification({
+    dueAt: assignment.dueAt,
+    learner,
+    learningUrl: `${team.url}${UNDERWRITING_COURSE_PATH}`,
+  });
 }
 
 async function awardBadgeIfEligible(
@@ -1288,6 +1309,9 @@ router.post(
         .map(normalizeEmail)
     );
     const emailed: string[] = [];
+    const slackNotified: string[] = [];
+    const slackSkipped: string[] = [];
+    const slackFailed: { email: string | null; error: string }[] = [];
 
     for (const assignedUser of users) {
       const [assignment, created] = await LearningAssignment.findOrCreate({
@@ -1338,6 +1362,36 @@ router.post(
           }
         }
       }
+
+      if (
+        isLearningSlackNotificationConfigured() &&
+        (created || !assignment.slackEnrollmentReminderSentAt)
+      ) {
+        const result = await sendEnrollmentSlackNotification(
+          assignment,
+          assignedUser
+        );
+
+        if (result.sent) {
+          await assignment.update({
+            slackEnrollmentReminderError: null,
+            slackEnrollmentReminderSentAt: new Date(),
+          });
+          if (assignedUser.email) {
+            slackNotified.push(assignedUser.email);
+          }
+        } else if (result.skipped) {
+          slackSkipped.push(assignedUser.email ?? assignedUser.id);
+        } else {
+          await assignment.update({
+            slackEnrollmentReminderError: result.error,
+          });
+          slackFailed.push({
+            email: assignedUser.email,
+            error: result.error,
+          });
+        }
+      }
     }
 
     ctx.body = {
@@ -1346,6 +1400,10 @@ router.post(
         courseId,
         emailed,
         missingEmails: emails.filter((email) => !foundEmails.has(email)),
+        slackConfigured: isLearningSlackNotificationConfigured(),
+        slackFailed,
+        slackNotified,
+        slackSkipped,
         users: users.map((assignedUser) => ({
           email: assignedUser.email,
           id: assignedUser.id,
