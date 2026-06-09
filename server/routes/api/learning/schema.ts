@@ -28,6 +28,12 @@ export const LearningOverviewSchema = BaseSchema.extend({
   }),
 });
 
+export const LearningResetSelfSchema = BaseSchema.extend({
+  body: z.object({
+    courseId: z.string().max(64).default("underwriting-training").optional(),
+  }),
+});
+
 export const LearningProgressSchema = BaseSchema.extend({
   body: z.object({
     courseId: z.string().max(64).default("underwriting-training").optional(),
@@ -112,6 +118,7 @@ export const LearningAssignSchema = BaseSchema.extend({
 
 export type LearningReportingReq = z.infer<typeof LearningReportingSchema>;
 export type LearningOverviewReq = z.infer<typeof LearningOverviewSchema>;
+export type LearningResetSelfReq = z.infer<typeof LearningResetSelfSchema>;
 export type LearningProgressReq = z.infer<typeof LearningProgressSchema>;
 export type LearningQuizStartReq = z.infer<typeof LearningQuizStartSchema>;
 export type LearningQuizSubmitReq = z.infer<typeof LearningQuizSubmitSchema>;

@@ -21,6 +21,7 @@ import {
   LearningAssignmentStatus,
   type LearningProgressState,
 } from "@server/models/LearningAssignment";
+import { sequelize } from "@server/storage/database";
 import type { APIContext } from "@server/types";
 import {
   getUnderwritingQuizById,
@@ -630,6 +631,65 @@ router.post(
 
     ctx.body = {
       data: await buildOverview(ctx, courseId),
+    };
+  }
+);
+
+router.post(
+  "learning.resetSelf",
+  auth(),
+  validate(T.LearningResetSelfSchema),
+  async (ctx: APIContext<T.LearningResetSelfReq>) => {
+    const { user } = ctx.state.auth;
+    const courseId = normalizeCourseId(ctx.input.body.courseId);
+    const assignment = await ensureAssignment(ctx, courseId, dueDateFromNow());
+    const where = {
+      courseId,
+      teamId: user.teamId,
+      userId: user.id,
+    };
+    const resetAt = new Date();
+    const dueAt = addDays(resetAt, DEFAULT_DUE_DAYS);
+    const { badgesDeleted, eventsDeleted, quizAttemptsDeleted } =
+      await sequelize.transaction(async (transaction) => {
+        const [quizAttempts, events, badges] = await Promise.all([
+          LearningQuizAttempt.destroy({ transaction, where }),
+          LearningEvent.destroy({ transaction, where }),
+          LearningBadge.destroy({ transaction, where }),
+        ]);
+
+        await assignment.update(
+          {
+            assignedAt: resetAt,
+            completedAt: null,
+            dueAt,
+            dueSoonReminderSentAt: null,
+            enrollmentReminderSentAt: null,
+            lastActivityAt: null,
+            overdueReminderSentAt: null,
+            progress: {},
+            progressPercent: 0,
+            status: LearningAssignmentStatus.NotStarted,
+          },
+          { transaction }
+        );
+
+        return {
+          badgesDeleted: badges,
+          eventsDeleted: events,
+          quizAttemptsDeleted: quizAttempts,
+        };
+      });
+
+    ctx.body = {
+      data: {
+        deleted: {
+          badges: badgesDeleted,
+          events: eventsDeleted,
+          quizAttempts: quizAttemptsDeleted,
+        },
+        overview: await buildOverview(ctx, courseId),
+      },
     };
   }
 );
