@@ -62,10 +62,10 @@ const brand = {
 };
 
 const GONG_TIME_EPSILON_SECONDS = 0.08;
-const SEEK_LOCK_GRACE_SECONDS = 1.25;
+const SEEK_LOCK_GRACE_SECONDS = 0.25;
 const SKILL_CHECK_REPLAY_BUFFER_SECONDS = 5;
 const SKILL_CHECK_MISS_PROMPT =
-  "Not quite. This skill check is required to move forward. You can continue the lesson now, but you'll need to replay this section and answer it correctly before completing the lesson.";
+  "Not quite. You will have to retake this section and pass the skill check before this lesson can be completed.";
 const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5] as const;
 const DEFAULT_UNDERWRITING_PROCESS_DOCUMENT_ID = "2m3IlLBz2i";
 const DOCUMENT_REVIEW_DURATION_SECONDS = 300;
@@ -343,7 +343,10 @@ function UnderwritingLesson() {
     : 0;
   const hasSkillCheckMiss = failedCheckpointIds.length > 0;
   const canAdvanceLesson = lessonCompleted && !hasSkillCheckMiss;
-  const lessonCheckpoints = production?.checkpoints ?? [];
+  const lessonCheckpoints = useMemo(
+    () => production?.checkpoints ?? [],
+    [production?.checkpoints]
+  );
   const firstFailedCheckpoint = lessonCheckpoints.find((checkpoint) =>
     failedCheckpointIds.includes(checkpoint.id)
   );
@@ -354,17 +357,6 @@ function UnderwritingLesson() {
     : -1;
   const replayFromStart =
     firstFailedCheckpointIndex <= 0 || !firstFailedCheckpoint;
-  const replayCheckpoint = replayFromStart
-    ? null
-    : lessonCheckpoints[firstFailedCheckpointIndex - 1];
-  const skillCheckReplayStart = firstFailedCheckpoint
-    ? replayFromStart
-      ? 0
-      : Math.max(
-          0,
-          (replayCheckpoint?.placement ?? 0) - SKILL_CHECK_REPLAY_BUFFER_SECONDS
-        )
-    : 0;
   const skillCheckReplayLabel = replayFromStart
     ? "Replay from beginning"
     : "Replay from last passed skill check";
@@ -897,10 +889,7 @@ function UnderwritingLesson() {
         0,
         Math.min(time, totalDuration || time)
       );
-      const learnerSeekLimit = Math.max(
-        displayedTime,
-        maxWatched + SEEK_LOCK_GRACE_SECONDS
-      );
+      const learnerSeekLimit = maxWatched + SEEK_LOCK_GRACE_SECONDS;
       const target = reviewMode
         ? requestedTarget
         : Math.min(requestedTarget, learnerSeekLimit);
@@ -927,7 +916,7 @@ function UnderwritingLesson() {
       setActiveCheckpoint(null);
       setCheckpointFeedback("");
     },
-    [displayedTime, maxWatched, pauseGongPlayback, reviewMode, totalDuration]
+    [maxWatched, pauseGongPlayback, reviewMode, totalDuration]
   );
 
   const seekTimelineFromPointer = useCallback(
@@ -952,10 +941,7 @@ function UnderwritingLesson() {
         return;
       }
 
-      const allowedTime = Math.max(
-        currentTime,
-        maxWatched + SEEK_LOCK_GRACE_SECONDS
-      );
+      const allowedTime = maxWatched + SEEK_LOCK_GRACE_SECONDS;
       if (mediaElement.currentTime <= allowedTime) {
         setCurrentTime(mediaElement.currentTime);
         return;
@@ -972,7 +958,7 @@ function UnderwritingLesson() {
         internalSeekRef.current = false;
       }, 0);
     },
-    [currentTime, maxWatched, reviewMode, totalDuration]
+    [maxWatched, reviewMode, totalDuration]
   );
 
   const jumpToSection = useCallback(
@@ -1116,31 +1102,50 @@ function UnderwritingLesson() {
     }
   }, [getActiveGongMediaElement]);
 
+  const replayLessonFromCheckpoint = useCallback(
+    (checkpoint: LessonCheckpoint) => {
+      const checkpointIndex = lessonCheckpoints.findIndex(
+        (item) => item.id === checkpoint.id
+      );
+      const replayStart =
+        checkpointIndex <= 0
+          ? 0
+          : Math.max(
+              0,
+              (lessonCheckpoints[checkpointIndex - 1]?.placement ?? 0) -
+                SKILL_CHECK_REPLAY_BUFFER_SECONDS
+            );
+
+      pauseGongPlayback();
+      setActiveCheckpoint(null);
+      setCheckpointFeedback("");
+      setRemediationCheckpointId(checkpoint.id);
+      setCompletedCheckpointIds((ids) =>
+        ids.filter((id) => id !== checkpoint.id)
+      );
+      setLessonCompleted(false);
+      setMaxWatched(replayStart);
+      setCurrentTime(replayStart);
+      setAutoGongClipSrc(null);
+      setIsTimelinePlaying(false);
+      lastTriggeredGongClipRef.current = "";
+
+      if (mediaRef.current) {
+        mediaRef.current.pause();
+        mediaRef.current.currentTime = replayStart;
+        window.setTimeout(() => void mediaRef.current?.play(), 50);
+      }
+    },
+    [lessonCheckpoints, pauseGongPlayback]
+  );
+
   const replayLessonForSkillChecks = useCallback(() => {
     if (!firstFailedCheckpoint) {
       return;
     }
 
-    pauseGongPlayback();
-    setActiveCheckpoint(null);
-    setCheckpointFeedback("");
-    setRemediationCheckpointId(firstFailedCheckpoint.id);
-    setCompletedCheckpointIds((ids) =>
-      ids.filter((id) => id !== firstFailedCheckpoint.id)
-    );
-    setLessonCompleted(false);
-    setMaxWatched(skillCheckReplayStart);
-    setCurrentTime(skillCheckReplayStart);
-    setAutoGongClipSrc(null);
-    setIsTimelinePlaying(false);
-    lastTriggeredGongClipRef.current = "";
-
-    if (mediaRef.current) {
-      mediaRef.current.pause();
-      mediaRef.current.currentTime = skillCheckReplayStart;
-      window.setTimeout(() => void mediaRef.current?.play(), 50);
-    }
-  }, [firstFailedCheckpoint, pauseGongPlayback, skillCheckReplayStart]);
+    replayLessonFromCheckpoint(firstFailedCheckpoint);
+  }, [firstFailedCheckpoint, replayLessonFromCheckpoint]);
 
   useEffect(() => {
     if (!reviewMode) {
@@ -1609,6 +1614,7 @@ function UnderwritingLesson() {
                     setCheckpointFeedback("");
                     window.setTimeout(() => void mediaRef.current?.play(), 50);
                   }}
+                  onRetake={() => replayLessonFromCheckpoint(activeCheckpoint)}
                 />
               ) : null}
             </PlayerShell>
@@ -1900,15 +1906,18 @@ function CheckpointOverlay({
   feedback,
   onAnswer,
   onContinue,
+  onRetake,
 }: {
   checkpoint: LessonCheckpoint;
   feedback: string;
   onAnswer: (option: LessonCheckpoint["options"][number]) => void;
   onContinue: () => void;
+  onRetake: () => void;
 }) {
   const passed = checkpoint.options.some(
     (option) => option.correct && feedback === option.feedback
   );
+  const missed = Boolean(feedback) && !passed;
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [shuffleSeed] = useState(() => Math.random().toString(36).slice(2));
   const displayOptions = useMemo(
@@ -1944,15 +1953,34 @@ function CheckpointOverlay({
           ))}
         </CheckpointOptions>
         <CheckpointFeedback $passed={passed} $visible={Boolean(feedback)}>
-          {feedback || "Select the best answer to continue."}
+          {missed ? (
+            <>
+              <strong>{feedback}</strong>
+              <span>
+                You can continue for now, or retake it immediately. Either way,
+                this section must be retaken and passed before the lesson can be
+                completed.
+              </span>
+            </>
+          ) : (
+            feedback || "Select the best answer to continue."
+          )}
         </CheckpointFeedback>
-        <CheckpointContinue
-          disabled={!feedback}
-          onClick={onContinue}
-          type="button"
-        >
-          Continue lesson
-        </CheckpointContinue>
+        <CheckpointActions>
+          <CheckpointContinue
+            $secondary={missed}
+            disabled={!feedback}
+            onClick={onContinue}
+            type="button"
+          >
+            {missed ? "Continue for now" : "Continue lesson"}
+          </CheckpointContinue>
+          {missed ? (
+            <CheckpointRetake onClick={onRetake} type="button">
+              Retake section now
+            </CheckpointRetake>
+          ) : null}
+        </CheckpointActions>
       </CheckpointModalCard>
     </CheckpointModal>
   );
@@ -6414,20 +6442,35 @@ const CheckpointFeedback = styled.div<{
   border-radius: 8px;
   color: ${(props) => (props.$passed ? "#26724d" : "#8a5a00")};
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.58);
-  font-size: 13px;
-  line-height: 1.35;
+  display: grid;
+  font-size: ${(props) => (props.$passed ? "13px" : "14px")};
+  gap: 7px;
+  line-height: 1.4;
   min-height: 58px;
   opacity: ${(props) => (props.$visible ? 1 : 0.86)};
   overflow: auto;
   padding: 12px;
+
+  strong {
+    display: block;
+    font-size: 16px;
+    line-height: 1.32;
+  }
 `;
 
-const CheckpointContinue = styled.button`
+const CheckpointActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+`;
+
+const CheckpointContinue = styled.button<{ $secondary?: boolean }>`
   align-items: center;
-  background: ${brand.blue};
-  border: 0;
+  background: ${(props) => (props.$secondary ? "#fff" : brand.blue)};
+  border: 1px solid
+    ${(props) => (props.$secondary ? "rgba(32, 48, 45, 0.22)" : brand.blue)};
   border-radius: 7px;
-  color: #fff;
+  color: ${(props) => (props.$secondary ? brand.ink : "#fff")};
   cursor: pointer;
   display: inline-flex;
   font-family: ${brand.mono};
@@ -6444,6 +6487,17 @@ const CheckpointContinue = styled.button`
     background: #d7d3ca;
     color: ${brand.muted};
     cursor: not-allowed;
+  }
+`;
+
+const CheckpointRetake = styled(CheckpointContinue)`
+  background: ${brand.blue};
+  border-color: ${brand.blue};
+  color: #fff;
+
+  &:hover {
+    background: #203bd8;
+    border-color: #203bd8;
   }
 `;
 
