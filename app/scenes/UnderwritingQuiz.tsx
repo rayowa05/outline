@@ -126,6 +126,15 @@ function UnderwritingQuiz() {
       Math.min(activeQuestionIndex, Math.max(0, displayQuestions.length - 1))
     ];
 
+  const reviewAnswers = useCallback(() => {
+    setCelebrating(false);
+    setActiveQuestionIndex(0);
+    window.setTimeout(
+      () => window.scrollTo({ behavior: "smooth", top: 0 }),
+      50
+    );
+  }, []);
+
   const startQuizAttempt = useCallback(
     (reviewPassedAttempt = true) => {
       if (!quiz) {
@@ -309,6 +318,13 @@ function UnderwritingQuiz() {
         {error ? <Alert>{error}</Alert> : null}
         {celebrating ? (
           <ConfettiOverlay aria-live="polite">
+            <ConfettiClose
+              aria-label="Close module completion prompt"
+              onClick={reviewAnswers}
+              type="button"
+            >
+              ×
+            </ConfettiClose>
             <ConfettiRain aria-hidden="true">
               {Array.from({ length: 88 }).map((_, index) => (
                 <span
@@ -329,11 +345,17 @@ function UnderwritingQuiz() {
               Module {quiz.moduleNumber} complete
             </ConfettiMessage>
             <ConfettiCopy>
-              You scored 100%. Continue when you are ready.
+              You scored 100%. Continue when you are ready, or review your
+              answers first.
             </ConfettiCopy>
-            <ConfettiAction as={Link} to={nextModuleHref}>
-              {completionCtaLabel}
-            </ConfettiAction>
+            <ConfettiActions>
+              <ConfettiAction as={Link} to={nextModuleHref}>
+                {completionCtaLabel}
+              </ConfettiAction>
+              <ConfettiButton onClick={reviewAnswers} type="button">
+                Review answers
+              </ConfettiButton>
+            </ConfettiActions>
           </ConfettiOverlay>
         ) : null}
 
@@ -781,6 +803,16 @@ const ConfettiCopy = styled.p`
   z-index: 2;
 `;
 
+const ConfettiActions = styled.div`
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+`;
+
 const ConfettiAction = styled.a`
   align-items: center;
   background: ${brand.blue};
@@ -798,6 +830,51 @@ const ConfettiAction = styled.a`
 
   &:hover {
     text-decoration: none;
+  }
+`;
+
+const ConfettiButton = styled.button`
+  align-items: center;
+  background: ${brand.surface};
+  border: 1px solid ${brand.rule};
+  border-radius: 8px;
+  color: ${brand.ink};
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  height: 40px;
+  justify-content: center;
+  padding: 0 16px;
+  position: relative;
+  z-index: 2;
+
+  &:hover {
+    border-color: ${brand.blue};
+  }
+`;
+
+const ConfettiClose = styled.button`
+  align-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid ${brand.rule};
+  border-radius: 999px;
+  color: ${brand.ink};
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 22px;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  line-height: 1;
+  position: fixed;
+  right: max(24px, calc(50vw - 204px));
+  top: calc(50vh - 128px);
+  width: 34px;
+  z-index: 3;
+
+  &:hover {
+    border-color: ${brand.blue};
   }
 `;
 

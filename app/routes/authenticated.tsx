@@ -69,7 +69,11 @@ function AuthenticatedRoutes() {
   const team = useCurrentTeam();
   const user = useCurrentUser();
   const can = usePolicy(team);
-  const canAccessLearning = user.email === "ray@dash.fi";
+  const canAccessLearning = [
+    "lucas@dash.fi",
+    "lukas.geipel@dash.fi",
+    "ray@dash.fi",
+  ].includes(user.email);
 
   return (
     <WebsocketProvider>
